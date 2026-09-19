@@ -1,0 +1,8 @@
+/* The portal label sits directly in the flowing stars. */
+.portal,.portal:hover{background:none!important;border:0!important;box-shadow:none!important}.portal-ring,.portal:hover .portal-ring{background:none!important;border:0!important;box-shadow:none!important}.portal-label{background:none!important;border:0!important;box-shadow:none!important;color:#f3f8ff;opacity:.86;font-size:13px;line-height:1.3;letter-spacing:.10em;text-shadow:0 1px 4px #081632,0 0 9px #051128;white-space:nowrap}.portal:focus-visible{outline:2px solid #c3e8ff;outline-offset:8px}.portal:hover .portal-label{opacity:1;color:white}
+@media(max-width:700px){.portal-label{font-size:12px}}
+
+.portal{left:calc(50% - min(77vw,108vh)*.0176)!important;top:calc(56% - min(77vw,108vh)*.11327)!important}
+@media(max-width:700px){.portal{left:calc(50% - 115vw*.0176)!important;top:calc(54% - 115vw*.11327)!important}}
+.flight-snapshot{pointer-events:none!important;overflow:hidden;isolation:isolate}
+body.in-warp .scene{pointer-events:none!important}

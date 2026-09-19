@@ -1,0 +1,38 @@
+:root{--dash-height:185px;--hat-gap:clamp(60px,12vh,114px);--hat-width:min(77vw,max(150px,calc((100svh - var(--dash-height) - var(--hat-gap) - 125px)*1.5)))}
+.galaxy-art{width:var(--hat-width)!important;top:auto!important;bottom:calc(var(--dash-height) + var(--hat-gap))!important;left:50%;transform:translateX(-50%)!important}
+.portal{left:calc(50% - var(--hat-width)*.0176)!important;top:calc(100% - var(--dash-height) - var(--hat-gap) - var(--hat-width)*.4466)!important}
+.portal-ring{display:none!important}.portal:before,.portal:after{display:none!important}
+.digital-companion{display:block;width:90%;height:90%;aspect-ratio:1;background-image:url('assets/companion-sheet.webp');background-size:200% 200%;background-position:0 0;background-repeat:no-repeat;will-change:transform;image-rendering:auto}
+.pet-screen[data-mood=laugh] .digital-companion{background-position:100% 0}.pet-screen[data-mood=curious] .digital-companion{background-position:0 100%}.pet-screen[data-mood=sleepy] .digital-companion{background-position:100% 100%}
+#showBlimp{width:260px;height:330px;background:none!important;border:0!important;box-shadow:none!important;filter:drop-shadow(0 4px 8px #01061966);padding:0}
+#showBlimp .blimp-body{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.show-ticker{position:absolute;overflow:hidden;background:#06191c;color:#9fffd4;font:bold 13px/1.4 monospace;white-space:nowrap;display:flex;align-items:center}
+.show-ticker>span{display:block;width:max-content;animation:show-scroll 12s linear infinite;text-shadow:0 0 5px #50ffe9}
+.hanging-flyer{position:absolute;display:block}.hanging-flyer img{display:block;width:100%;height:100%;object-fit:contain;background:#22221f}
+#showBlimp[data-direction=right] .show-ticker,#showBlimp[data-direction=right] .hanging-flyer{transform:scaleX(-1)}
+@keyframes show-scroll{to{transform:translateX(-50%)}}
+.paused .show-ticker>span{animation-play-state:paused}
+@media(max-width:700px){:root{--dash-height:170px;--hat-gap:60px;--hat-width:min(100vw,max(150px,calc((100svh - var(--dash-height) - var(--hat-gap) - 110px)*1.5)))}#showBlimp{width:175px;height:225px}.show-ticker{font-size:10px}.radio-screen .volume-control{bottom:calc(var(--dash-height)*.15)!important}.pet-screen #petSpeech{left:-40%;width:170px}}
+
+.digital-companion{width:90%;height:auto;max-height:100%;aspect-ratio:400/275;border-radius:8px;overflow:hidden}
+#showBlimp{width:300px;height:300px}.show-ticker{left:22.33%;top:20.58%;width:52.47%;height:9.57%}.hanging-flyer{left:34.45%;top:54.23%;width:28.55%;height:36.28%}
+#showBlimp .blimp-exhaust{left:97%;top:25%;width:50px}
+@media(max-width:700px){#showBlimp{width:200px;height:200px}}
+
+/* All ship overlays are measured against the same transparent square artwork. */
+#showBlimp{width:375px;height:375px}
+#showBlimp .blimp-assembly{inset:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+#showBlimp .show-ticker{left:22.33%;top:20.58%;right:auto;bottom:auto;width:52.47%;height:9.57%;padding:0;border:0;border-radius:0;background:transparent;color:#9fffd4}
+#showBlimp .show-ticker>span{position:static;display:block;flex:none;width:max-content;padding:0;border:0;background:transparent;white-space:nowrap;font:700 15px/1 monospace}
+#showBlimp .hanging-flyer{left:34.45%;top:54.23%;right:auto;bottom:auto;width:28.55%;height:36.28%;padding:0;border:0;border-radius:0;background:none;overflow:hidden}
+#showBlimp .hanging-flyer img{width:100%;height:100%;object-fit:fill;background:none}
+#showBlimp .blimp-exhaust{padding:0;border:0;background:none;right:auto;bottom:auto}
+/* Clip only the display, leaving the speech bubble free above the dashboard. */
+.pet-display{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;overflow:hidden;background:#041d29;isolation:isolate;mask-image:radial-gradient(ellipse,#000 60%,transparent 73%)}
+.pet-display .digital-companion{flex:none;width:110%;height:110%;max-height:none;max-width:none;aspect-ratio:auto;border-radius:0;margin:0}
+@media(max-width:700px){#showBlimp{width:250px;height:250px}#showBlimp .show-ticker>span{font-size:12px}}
+
+.pet-screen .pet-display{max-width:none;margin:0}
+
+/* Enlarge each world and its attached sign together. */
+#hub .island{scale:1.2;transform-origin:center center}
