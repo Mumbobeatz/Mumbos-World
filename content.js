@@ -9,3 +9,35 @@ media:{title:'Media Center',kicker:'03 / TRANSMITTING FROM MUMBO’S WORLD',subt
 about:{title:'Mumbo’s Moon',kicker:'THE LITTLE MOON / ABOUT MUMBO',subtitle:'Beep boop. Welcome to my corner of the universe.',background:'galaxy',body:()=>`<div class="about-layout"><img class="avatar" src="assets/character.webp" alt="MUMBO character in a fluffy blue jacket and star-covered bucket hat, carrying glowing headphones"><div class="about-copy"><p>I’m Ryan, aka MUMBO—a San Diego DJ and producer with a love for heavy bass, funky house, and taking the unexpected turn.</p><p>My sets move between sounds, but the goal stays the same: make you move your body and leave with a smile. That playful energy shows up in the music, the cartoons, the characters, and everything you’ll find here.</p><p>Mumbo’s World is where it all comes together. Pick a portal. Get a little lost.</p><div class="links">${link('https://instagram.com/mumbobeatz','Say hi on Instagram')}${link('mailto:mumbobeatz@gmail.com','Bookings')}</div></div></div>`},
 toys:{title:'Mumbo’s Playground',kicker:'04 / PLAY IN PROGRESS',subtitle:'A new playground is taking shape.',background:'playground',body:()=>`<div class="toy-message"><p class="eyebrow">UNDER CONSTRUCTION</p><h2>Big kid energy. Work in progress.</h2><p>The rides, games, and strange little surprises are still being built. Come back for the grand opening.</p></div>`}
 };
+const WORLD_INFO={
+ music:'Music and Live sets/mixes.',
+ events:'Past and future Mumbo events.',
+ media:'The social hub, connect to Mumbo in more ways than one!',
+ about:'Meet Mumbo and explore the man behind the bucket hat.',
+ toys:'All things Mumbo... merch, games, toys and much more.'
+};
+const MUSIC_ORDER=['as-seen-on','event-central','silly-singles','secret-stuff'];
+const SUBWORLDS={
+ 'as-seen-on':{title:'As Seen On…',image:'as-seen-on-v2',info:'The debut EP: four songs and four corners of the park.',stops:[
+  {name:'Power On',kind:'Track 1 · August 4, 2025',description:'Power On — MUMBO.',x:62,y:27,w:25,h:6,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
+  {name:'Mumbo Jumbo',kind:'Track 2 · August 4, 2025',description:'Mumbo Jumbo — MUMBO.',x:62,y:33,w:25,h:6,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
+  {name:'My Name Is (I Like to Party)',kind:'Track 3 · August 4, 2025',description:'My Name Is (I Like to Party) — MUMBO.',x:62,y:39,w:25,h:7,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
+  {name:'Berries & Cream',kind:'Track 4 · August 4, 2025',description:'Berries & Cream — MUMBO.',x:62,y:46,w:25,h:6,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
+  {name:'Mumbo Jumbo Park',kind:'Amusement park',description:'Roller coasters, rides and the Mumbo Jumbo side of the EP.',x:31,y:27,w:29,h:31},
+  {name:'Hot Rod Arena',kind:'Skate / BMX / motocross park',description:'Ramps, dirt-bike jumps and tracks inspired by the Hot Rod world.',x:34,y:61,w:31,h:30},
+  {name:'Berries & Cream Land',kind:'Playground and courts',description:'A berry-and-candy park with swings, basketball and tennis courts.',x:78,y:65,w:30,h:31}
+ ]},
+ 'event-central':{title:'Event Central',image:'event-central-v2',info:'Upcoming and past shows.',stops:[
+  {name:'Hurtbox — No Love Lost',kind:'Friday · October 2, 2026',description:'Spin Nightclub · San Diego, CA · 9 PM–4 AM · 21+. Hurtbox with Warlord, Proxxxy, Finnuh, 91Octane, Jonnyboy, Kurtzee, MUMBO and Sira.',x:75,y:27,w:29,h:43,url:'https://instagram.com/mumbobeatz',label:'Show updates'},
+  {name:'Event Central Stage',kind:'Live show',description:'The next stop in Mumbo’s live universe.',x:52,y:48,w:30,h:42}
+ ]},
+ 'silly-singles':{title:'Silly Singles',image:'music-landing-v2',position:'left center',info:'The jukebox for singles, flips and one-off releases.',comingSoon:true,stops:[
+  {name:'Silly Singles',kind:'Interactive jukebox · coming soon',description:'A future jukebox for MUMBO singles with Apple Music, Spotify, SoundCloud and YouTube links.',x:24,y:28,w:35,h:42,url:'https://soundcloud.com/mumbobeatz',label:'Browse SoundCloud'}
+ ]},
+ 'secret-stuff':{title:'Mumbo’s Secret Stuff',image:'secret-stuff-v2',info:'SoundCloud-exclusive mashups from Mumbo’s Secret Stuff Vol. 1.',stops:[
+  {name:'GRIZTRONICS / SPACE INVADERZ / MS. JACKSON',kind:'Track 1 · SoundCloud exclusive',description:'GRiZ & Subtronics (Cyclops Remix) × Joogornot × TIKI Edit.',x:68,y:26,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'},
+  {name:'YOU & ME × TURN ON THE LIGHTS',kind:'Track 2 · SoundCloud exclusive',description:'Flume (Westend & Local Singles Remix) × Fred again.. (Z A K Edit).',x:68,y:36,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'},
+  {name:'DON’T LET ME DOWN × COLD HEARTED',kind:'Track 3 · SoundCloud exclusive',description:'Chainsmokers (Spag Heddy Remix) × Seven Lions & Kill The Noise.',x:68,y:46,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'},
+  {name:'RENEGADE MASTA',kind:'Track 4 · SoundCloud exclusive',description:'Mumbo Flip · Released May 15, 2024.',x:68,y:56,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'}
+ ]}
+};

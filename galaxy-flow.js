@@ -4,17 +4,32 @@ vec2 inflow(vec2 d,float phase,float turn,float weight){
  float a=turn+phase*.12;mat2 rotation=mat2(cos(a),-sin(a),sin(a),cos(a));
  return vec2(.4824,.6699)+rotation*d*(1.+phase*.18*weight);
 }
+// Move only the interior storm texture along elliptical latitude bands. The short
+// overlapping phases keep movement continuous without winding up the outline.
+vec3 axialStorm(vec2 point,vec2 center,vec2 axes,vec3 original){
+ vec2 local=(point-center)/axes;float r=length(local);
+ float mask=1.-smoothstep(.55,1.,r);
+ float phase=fract(t*.045),other=fract(phase+.5);
+ float weight=1.-abs(phase*2.-1.);
+ float a=phase*.28,b=other*.28;
+ mat2 first=mat2(cos(a),-sin(a),sin(a),cos(a));
+ mat2 second=mat2(cos(b),-sin(b),sin(b),cos(b));
+ vec3 moved=mix(texture2D(tex,center+(second*local)*axes).rgb,texture2D(tex,center+(first*local)*axes).rgb,weight);
+ return mix(original,moved,mask*.85);
+}
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float colorNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
 void main(){
  vec4 base=texture2D(tex,uv);vec4 col=base;
+ col.rgb=axialStorm(uv,vec2(.49,.65),vec2(.20,.17),col.rgb);
+ col.rgb=axialStorm(uv,vec2(.49,.33),vec2(.32,.095),col.rgb);
  vec2 d=uv-vec2(.4824,.6699);float radius=length(d);
  float interior=1.-smoothstep(.06325,.15525,radius);
  float phase=fract(t*.075);float phaseB=fract(phase+.5);
  float blend=1.-abs(phase*2.-1.);
  vec4 flowA=texture2D(tex,inflow(d,phase,t*.20,interior));
  vec4 flowB=texture2D(tex,inflow(d,phaseB,t*.20,interior));
- col.rgb=mix(base.rgb,mix(flowB.rgb,flowA.rgb,blend),interior);
+ col.rgb=mix(col.rgb,mix(flowB.rgb,flowA.rgb,blend),interior);
  // Low-amplitude light travels through existing dust, never displacing the brim.
  float dust=exp(-dot((uv-vec2(.50,.48))*vec2(1.,1.4),(uv-vec2(.50,.48))*vec2(1.,1.4))/.025);
  col.rgb*=1.+.035*dust*sin(length(uv-vec2(.4824,.6699))*95.+t*1.2);

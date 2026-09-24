@@ -5,12 +5,19 @@
  let frame=0,cleanup=null,raw={x:0,y:0},smooth={x:0,y:0};
  document.addEventListener('pointermove',e=>{raw={x:(e.clientX/innerWidth-.5)*2,y:(e.clientY/innerHeight-.5)*2}},{passive:true});
  window.captureFlightScene=source=>{
-  const clone=source.cloneNode(true);
+  const clone=source.cloneNode(true);clone.dataset.flightFrom=source.id;
   const originals=[source,...source.querySelectorAll('*')],copies=[clone,...clone.querySelectorAll('*')];
   originals.forEach((node,i)=>{
    const copy=copies[i],style=getComputedStyle(node);
    for(const property of style)copy.style.setProperty(property,style.getPropertyValue(property));
    copy.removeAttribute('id');copy.removeAttribute('autofocus');copy.style.animation='none';copy.style.transition='none';
+   // Preserve the visible hat/portal geometry during entry. Responsive !important
+   // rules must not reposition the snapshot after the home scene is hidden.
+   if(source.id==='galaxy'&&(node.classList.contains('galaxy-art')||node.classList.contains('portal'))){
+    for(const property of ['left','top','right','bottom','width','height','transform','transform-origin'])
+     copy.style.setProperty(property,style.getPropertyValue(property),'important');
+   }
+
    if(node.tagName==='CANVAS'){
     const replacement=document.createElement('img');replacement.src='assets/galaxy-v7.webp';replacement.style.cssText=copy.style.cssText;replacement.style.opacity='1';copy.replaceWith(replacement);
    }
@@ -22,6 +29,7 @@
  window.cancelFlight=()=>{cancelAnimationFrame(frame);cleanup?.();cleanup=null};
  window.runFlight=(source,target,point,reverse,done)=>{
   const original=target.getAttribute('style');
+  const throughPortal=!reverse&&source.dataset?.flightFrom==='galaxy';
   const sourceUI=[...source.querySelectorAll('.portal-label,.hanging-sign,.entry-note,.map-caption,.city-heading,.island-sign')];
   const targetUI=[...target.querySelectorAll('.city-heading,.map-caption,.portal-label,.entry-note')];
   const uiStyles=targetUI.map(el=>el.getAttribute('style'));
@@ -38,8 +46,16 @@
    smooth.x+=(raw.x-smooth.x)*.07;smooth.y+=(raw.y-smooth.y)*.07;
    const x=-smooth.x,y=-smooth.y;
    if(!reverse){
-    source.style.transform=`scale(${1+6.5*ep}) translate(${x*7*ep}px,${y*7*ep}px)`;
-    source.style.opacity=String(1-clamp((p-.65)/.2));
+    if(throughPortal){
+     source.style.transform=`translate(${(innerWidth/2-point.x)*ep}px,${(innerHeight*.45-point.y)*ep}px) scale(${1+14*ep})`;
+     const opening=clamp((p-.28)/.60)*45;
+     const aperture=`radial-gradient(circle at ${point.x}px ${point.y}px,transparent ${opening}px,#000 ${opening+9}px)`;
+     source.style.maskImage=aperture;source.style.webkitMaskImage=aperture;
+     source.style.opacity=String(1-clamp((p-.88)/.12));
+    }else{
+     source.style.transform=`scale(${1+6.5*ep}) translate(${x*7*ep}px,${y*7*ep}px)`;
+     source.style.opacity=String(1-clamp((p-.65)/.2));
+    }
     target.style.transform=`scale(${(1+.18*ep)/1.18}) translate(${x*6*(1-p)}px,${y*6*(1-p)}px)`;
     target.style.opacity=String(clamp(p/.18));
    }else{
