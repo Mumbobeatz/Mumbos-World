@@ -18,7 +18,7 @@ const WORLD_INFO={
 };
 const MUSIC_ORDER=['as-seen-on','event-central','silly-singles','secret-stuff'];
 const SUBWORLDS={
- 'as-seen-on':{title:'As Seen On…',image:'as-seen-on-v2',info:'The debut EP: four songs and four corners of the park.',stops:[
+ 'as-seen-on':{title:'As Seen On…',image:'as-seen-on-cutout-v3',info:'The debut EP: four songs and four corners of the park.',stops:[
   {name:'Power On',kind:'Track 1 · August 4, 2025',description:'Power On — MUMBO.',x:62,y:27,w:25,h:6,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
   {name:'Mumbo Jumbo',kind:'Track 2 · August 4, 2025',description:'Mumbo Jumbo — MUMBO.',x:62,y:33,w:25,h:6,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
   {name:'My Name Is (I Like to Party)',kind:'Track 3 · August 4, 2025',description:'My Name Is (I Like to Party) — MUMBO.',x:62,y:39,w:25,h:7,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
@@ -27,14 +27,14 @@ const SUBWORLDS={
   {name:'Hot Rod Arena',kind:'Skate / BMX / motocross park',description:'Ramps, dirt-bike jumps and tracks inspired by the Hot Rod world.',x:34,y:61,w:31,h:30},
   {name:'Berries & Cream Land',kind:'Playground and courts',description:'A berry-and-candy park with swings, basketball and tennis courts.',x:78,y:65,w:30,h:31}
  ]},
- 'event-central':{title:'Event Central',image:'event-central-v2',info:'Upcoming and past shows.',stops:[
+ 'event-central':{title:'Event Central',image:'event-central-cutout-v3',info:'Upcoming and past shows.',stops:[
   {name:'Hurtbox — No Love Lost',kind:'Friday · October 2, 2026',description:'Spin Nightclub · San Diego, CA · 9 PM–4 AM · 21+. Hurtbox with Warlord, Proxxxy, Finnuh, 91Octane, Jonnyboy, Kurtzee, MUMBO and Sira.',x:75,y:27,w:29,h:43,url:'https://instagram.com/mumbobeatz',label:'Show updates'},
   {name:'Event Central Stage',kind:'Live show',description:'The next stop in Mumbo’s live universe.',x:52,y:48,w:30,h:42}
  ]},
- 'silly-singles':{title:'Silly Singles',image:'music-planet-v3',position:'left center',info:'The jukebox for singles, flips and one-off releases.',comingSoon:true,stops:[
+ 'silly-singles':{title:'Silly Singles',image:'music-cutout-v3',position:'left center',info:'The jukebox for singles, flips and one-off releases.',comingSoon:true,stops:[
   {name:'Silly Singles',kind:'Interactive jukebox · coming soon',description:'A future jukebox for MUMBO singles with Apple Music, Spotify, SoundCloud and YouTube links.',x:24,y:28,w:35,h:42,url:'https://soundcloud.com/mumbobeatz',label:'Browse SoundCloud'}
  ]},
- 'secret-stuff':{title:'Mumbo’s Secret Stuff',image:'secret-stuff-v2',info:'SoundCloud-exclusive mashups from Mumbo’s Secret Stuff Vol. 1.',stops:[
+ 'secret-stuff':{title:'Mumbo’s Secret Stuff',image:'secret-stuff-cutout-v3',info:'SoundCloud-exclusive mashups from Mumbo’s Secret Stuff Vol. 1.',stops:[
   {name:'GRIZTRONICS / SPACE INVADERZ / MS. JACKSON',kind:'Track 1 · SoundCloud exclusive',description:'GRiZ & Subtronics (Cyclops Remix) × Joogornot × TIKI Edit.',x:68,y:26,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'},
   {name:'YOU & ME × TURN ON THE LIGHTS',kind:'Track 2 · SoundCloud exclusive',description:'Flume (Westend & Local Singles Remix) × Fred again.. (Z A K Edit).',x:68,y:36,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'},
   {name:'DON’T LET ME DOWN × COLD HEARTED',kind:'Track 3 · SoundCloud exclusive',description:'Chainsmokers (Spag Heddy Remix) × Seven Lions & Kill The Noise.',x:68,y:46,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'},

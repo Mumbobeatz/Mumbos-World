@@ -3,7 +3,9 @@
  function place(){
   if(document.body.dataset.scene!=='galaxy')return;
   // Layout dimensions exclude the temporary 7.5x return-flight transform.
-  const signBottom=sign.offsetTop+sign.offsetHeight,dashTop=innerHeight-dash.offsetHeight;
+  const signBottom=sign.offsetTop+sign.offsetHeight;
+  const selector=document.getElementById('worldSelector');
+  const dashTop=innerHeight-dash.offsetHeight+Math.min(0,selector?.offsetTop||0)-24;
   hat.style.removeProperty('width');
   const available=Math.max(0,dashTop-signBottom-32);
   const width=Math.min(hat.offsetWidth,available*1.5),center=(signBottom+dashTop)/2;
