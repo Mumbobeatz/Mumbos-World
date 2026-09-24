@@ -31,7 +31,7 @@ const SUBWORLDS={
   {name:'Hurtbox — No Love Lost',kind:'Friday · October 2, 2026',description:'Spin Nightclub · San Diego, CA · 9 PM–4 AM · 21+. Hurtbox with Warlord, Proxxxy, Finnuh, 91Octane, Jonnyboy, Kurtzee, MUMBO and Sira.',x:75,y:27,w:29,h:43,url:'https://instagram.com/mumbobeatz',label:'Show updates'},
   {name:'Event Central Stage',kind:'Live show',description:'The next stop in Mumbo’s live universe.',x:52,y:48,w:30,h:42}
  ]},
- 'silly-singles':{title:'Silly Singles',image:'music-landing-v2',position:'left center',info:'The jukebox for singles, flips and one-off releases.',comingSoon:true,stops:[
+ 'silly-singles':{title:'Silly Singles',image:'music-planet-v3',position:'left center',info:'The jukebox for singles, flips and one-off releases.',comingSoon:true,stops:[
   {name:'Silly Singles',kind:'Interactive jukebox · coming soon',description:'A future jukebox for MUMBO singles with Apple Music, Spotify, SoundCloud and YouTube links.',x:24,y:28,w:35,h:42,url:'https://soundcloud.com/mumbobeatz',label:'Browse SoundCloud'}
  ]},
  'secret-stuff':{title:'Mumbo’s Secret Stuff',image:'secret-stuff-v2',info:'SoundCloud-exclusive mashups from Mumbo’s Secret Stuff Vol. 1.',stops:[

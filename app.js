@@ -22,7 +22,7 @@ function travel(name,origin,fromHistory=false){
  let point=origin;
  if(previous==='galaxy')point=$('.portal');
  else if(previous==='hub'&&CITIES[name])point=document.querySelector(`.island[data-go="${name}"]`);
- else if(previous==='music'&&SUBWORLDS[name])point=document.querySelector(`[data-go="${name}"]`);
+ else if(previous==='music'&&SUBWORLDS[name])point=origin||document.querySelector(`.building[data-stop="${CITIES.music.stops.findIndex(stop=>stop.go===name)}"]`);
  let rect=point?.getBoundingClientRect();
  const scene=present(name);
  if(reverse){point=name==='galaxy'?$('.portal'):name==='music'?document.querySelector(`[data-go="${previous}"]`):document.querySelector(`.island[data-go="${previous}"]`);rect=point?.getBoundingClientRect()}
@@ -32,7 +32,7 @@ function travel(name,origin,fromHistory=false){
 }
 document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go)travel(go.dataset.go,go);else if(!e.target.closest('#quickNav,#menuToggle'))closeMenu()});
 document.querySelectorAll('.island').forEach(b=>{b.addEventListener('pointerenter',()=>hoveredIsland=b);b.addEventListener('pointerleave',()=>hoveredIsland=null)});
-window.addEventListener('wheel',e=>{if(Math.abs(e.deltaX||0)>Math.abs(e.deltaY)||e.ctrlKey||e.target.closest('#cockpit,#directoryDialog,#quickNav'))return;if(!['galaxy','hub'].includes(current)&&!CITIES[current])return;const now=performance.now();if(busy||now-lastTravel<280){e.preventDefault();return}let target=null,origin=null;if(e.deltaY>0){if(current==='hub')target='galaxy';else if(CITIES[current])target='hub'}else if(e.deltaY<0){if(current==='galaxy'){target='hub';origin=$('.portal')}else if(current==='hub'){origin=e.target.closest('.island')||hoveredIsland;target=origin?.dataset.go}}
+window.addEventListener('wheel',e=>{if(Math.abs(e.deltaX||0)>Math.abs(e.deltaY)||e.ctrlKey||e.target.closest('#cockpit,#directoryDialog,#quickNav'))return;if(!['galaxy','hub'].includes(current)&&!CITIES[current]&&!SUBWORLDS[current])return;const now=performance.now();if(busy||now-lastTravel<280){e.preventDefault();return}let target=null,origin=null;if(e.deltaY>0){if(current==='hub')target='galaxy';else if(SUBWORLDS[current])target='music';else if(CITIES[current])target='hub'}else if(e.deltaY<0){if(current==='galaxy'){target='hub';origin=$('.portal')}else if(current==='hub'){origin=e.target.closest('.island')||hoveredIsland;target=origin?.dataset.go}}
 if(!target)return;e.preventDefault();if(now-lastWheel>220||Math.sign(zoomSum)!==Math.sign(e.deltaY))zoomSum=0;lastWheel=now;zoomSum+=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1);clearTimeout(wheelTimer);wheelTimer=setTimeout(()=>zoomSum=0,240);if(Math.abs(zoomSum)>=65)travel(target,origin)
 },{passive:false});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#directoryDialog').open){e.preventDefault();closeDirectory()}else if(selectedStop!==null)closeStop();else if(!$('#quickNav').hidden){closeMenu();$('#menuToggle').focus()}else if(current!=='galaxy')travel(SUBWORLDS[current]?'music':current==='hub'?'galaxy':'hub')}});
