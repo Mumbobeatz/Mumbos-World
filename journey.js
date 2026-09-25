@@ -47,7 +47,8 @@
   source.style.transformOrigin=`${originX}px ${originY}px`;
   Object.assign(target.style,{transformOrigin:reverse?`${targetX}px ${targetY}px`:'50% 45%',willChange:'transform,opacity',animation:'none',transition:'none'});
   const isWorldArrival=!reverse&&(target.id==='city'||target.id==='subworld');
-  const mist=isWorldArrival?document.createElement('div'):null;
+  const isWorldDeparture=reverse&&(source.dataset?.flightFrom==='city'||source.dataset?.flightFrom==='subworld');
+  const mist=(isWorldArrival||isWorldDeparture)?document.createElement('div'):null;
   if(mist){mist.className='world-arrival-mist';document.body.append(mist)}
   const previousRestore=cleanup;
   cleanup=()=>{mist?.remove();previousRestore()};
@@ -81,7 +82,7 @@
    }
    sourceUI.forEach(el=>el.style.opacity=String(1-clamp(p/.22)));
    targetUI.forEach(el=>el.style.opacity=String(clamp((p-.68)/.16)));
-   if(mist)mist.style.opacity=String(Math.sin(Math.PI*clamp((p-.64)/.36))*.68);
+   if(mist){const cloudProgress=isWorldArrival?clamp((p-.58)/.42):clamp((p-.08)/.64);mist.style.opacity=String(Math.sin(Math.PI*cloudProgress)*.82)}
    if(p<1)frame=requestAnimationFrame(render);else{mist?.remove();restore();cleanup=null;done()}
   }
   render(start);
@@ -91,7 +92,8 @@
   const original=target.getAttribute('style'),sign=direction<0?-1:1;
   const width=target.getBoundingClientRect().width,radius=width*.78,depth=Math.max(900,width*1.4);
   const restore=()=>{source.remove();target.classList.remove('orbiting');if(original===null)target.removeAttribute('style');else target.setAttribute('style',original)};
-  cleanup=restore;source.classList.add('orbiting');target.classList.add('orbiting');
+  const mist=document.createElement('div');mist.className='world-arrival-mist';document.body.append(mist);
+  cleanup=()=>{mist.remove();restore()};source.classList.add('orbiting');target.classList.add('orbiting');
   for(const el of [source,target])Object.assign(el.style,{transformOrigin:'50% 50%',animation:'none',transition:'none',willChange:'transform,opacity'});
   const start=performance.now(),duration=900;
   function render(now){
@@ -100,7 +102,8 @@
    source.style.transform=`perspective(${depth}px) translateX(${-sign*Math.sin(outgoing)*radius}px) translateZ(${-radius*.35*(1-Math.cos(outgoing))}px) rotateY(${-sign*outgoing*20}deg)`;
    target.style.transform=`perspective(${depth}px) translateX(${sign*Math.sin(incoming)*radius}px) translateZ(${-radius*.35*(1-Math.cos(incoming))}px) rotateY(${sign*incoming*20}deg)`;
    source.style.opacity=String(1-ep);target.style.opacity=String(ep);
-   if(p<1)frame=requestAnimationFrame(render);else{restore();cleanup=null;done()}
+   mist.style.opacity=String(Math.pow(Math.sin(Math.PI*p),2)*.75);
+   if(p<1)frame=requestAnimationFrame(render);else{mist.remove();restore();cleanup=null;done()}
   }
   render(start);
  };

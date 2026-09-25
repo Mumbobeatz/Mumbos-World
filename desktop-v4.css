@@ -30,6 +30,12 @@
 #gpsScreen .gps-top{flex-basis:19px;min-height:19px;padding:3px 7px 2px;box-sizing:border-box}
 /* A brief cloud bank masks the last part of the approach to a mini world. */
 .world-arrival-mist{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;background:radial-gradient(ellipse 70% 46% at 50% 59%,#d9fbffb0 0%,#99dff899 35%,#6689c864 60%,transparent 88%);filter:blur(34px)}
+
+/* The broadcast district sits inside its own ocean planet, like Music Island. */
+#cityStage:has(#cityArt[src*="media-ocean-v1"]) #cityArt{width:84%;height:92%;margin:1% auto 0;object-fit:fill;-webkit-mask-image:radial-gradient(ellipse 50% 50% at center,#000 76%,#000b 85%,transparent 100%);mask-image:radial-gradient(ellipse 50% 50% at center,#000 76%,#000b 85%,transparent 100%);filter:drop-shadow(0 0 18px #c5f9ff88)}
+#cityStage:has(#cityArt[src*="media-ocean-v1"]) #cityHotspots,#cityStage:has(#cityArt[src*="media-ocean-v1"]) #cityLife{transform:scale(.84,.92);transform-origin:50% 50%}
+body.custom-cursor #cursor{width:62px;height:62px;filter:drop-shadow(0 0 5px #d8f8ff) drop-shadow(0 0 12px #80d9ff99)}
+#cursorSmoke{opacity:.9}
 /* Highlight the art under the pointer, without adding a floating label or ring. */
 .subworld-hotspot,.subworld-hotspot:hover,.subworld-hotspot:focus-visible{border:0!important;outline:0!important;box-shadow:none!important;background:transparent;border-radius:0;padding:0;transform:translate(-50%,-50%) skewY(var(--hotspot-tilt,0deg));transition:background .15s ease;}
 .subworld-hotspot span{display:none!important}
