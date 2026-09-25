@@ -1,7 +1,7 @@
 /* Continuous layered camera push, adapted from the supplied motion reference. */
 (()=>{
  const clamp=v=>Math.max(0,Math.min(1,v));
- const ease=t=>t<.5?2*t*t:-1+(4-2*t)*t;
+ const ease=t=>t*t*t*(t*(t*6-15)+10);
  let frame=0,cleanup=null,raw={x:0,y:0},smooth={x:0,y:0};
  document.addEventListener('pointermove',e=>{raw={x:(e.clientX/innerWidth-.5)*2,y:(e.clientY/innerHeight-.5)*2}},{passive:true});
  window.captureFlightScene=source=>{
@@ -9,7 +9,9 @@
   const originals=[source,...source.querySelectorAll('*')],copies=[clone,...clone.querySelectorAll('*')];
   originals.forEach((node,i)=>{
    const copy=copies[i],style=getComputedStyle(node);
-   for(const property of style)copy.style.setProperty(property,style.getPropertyValue(property));
+   const properties=['position','display','box-sizing','left','top','right','bottom','width','height','min-width','min-height','max-width','max-height','margin','padding','aspect-ratio','overflow','z-index','opacity','visibility','transform','transform-origin','perspective','filter','mix-blend-mode','isolation','background','background-size','background-position','background-repeat','border','border-radius','box-shadow','color','font','text-align','text-shadow','white-space','letter-spacing','line-height','align-items','justify-content','flex-direction','gap','grid-template-columns','grid-template-rows','object-fit','object-position','mask-image','mask-size','mask-position','mask-repeat','mask-composite','clip-path'];
+   const frozen=properties.map(property=>[property,style.getPropertyValue(property)]);
+   for(const [property,value] of frozen)copy.style.setProperty(property,value,'important');
    copy.removeAttribute('id');copy.removeAttribute('autofocus');copy.style.animation='none';copy.style.transition='none';
    // Preserve the visible hat/portal geometry during entry. Responsive !important
    // rules must not reposition the snapshot after the home scene is hidden.
@@ -19,9 +21,10 @@
    }
 
    if(node.tagName==='CANVAS'){
-    const replacement=document.createElement('img');replacement.src='assets/galaxy-v7.webp';replacement.style.cssText=copy.style.cssText;replacement.style.opacity='1';copy.replaceWith(replacement);
+    const replacement=document.createElement('img');try{replacement.src=node.id==='galaxyFlow'&&window.captureGalaxyFrame?window.captureGalaxyFrame():node.toDataURL()}catch{replacement.src='assets/galaxy-v7.webp'};replacement.style.cssText=copy.style.cssText;replacement.style.opacity='1';copy.replaceWith(replacement);
    }
   });
+  for(const property of ['transform','transform-origin','opacity','z-index','mask-image','filter'])clone.style.removeProperty(property);
   clone.classList.remove('scene','active');clone.classList.add('flight-snapshot');clone.hidden=false;clone.inert=true;clone.setAttribute('aria-hidden','true');
   const bounds=source.getBoundingClientRect();
   clone.dataset.snapshotLeft=String(bounds.left);clone.dataset.snapshotTop=String(bounds.top);
@@ -46,11 +49,17 @@
   const centerX=bounds.left+bounds.width/2,centerY=bounds.top+bounds.height*.45;
   source.style.transformOrigin=`${originX}px ${originY}px`;
   Object.assign(target.style,{transformOrigin:reverse?`${targetX}px ${targetY}px`:'50% 45%',willChange:'transform,opacity',animation:'none',transition:'none'});
-  const start=performance.now(),duration=2400;
+  const isWorldArrival=!reverse&&(target.id==='city'||target.id==='subworld');
+  const isWorldDeparture=reverse&&(source.dataset?.flightFrom==='city'||source.dataset?.flightFrom==='subworld');
+  const mist=(isWorldArrival||isWorldDeparture)?document.createElement('div'):null;
+  if(mist){mist.className='world-arrival-mist';document.body.append(mist)}
+  const previousRestore=cleanup;
+  cleanup=()=>{mist?.remove();previousRestore()};
+  const start=performance.now(),duration=throughPortal?2100:1800;
   function render(now){
    const p=paused?1:clamp((now-start)/duration),ep=ease(p);
    smooth.x+=(raw.x-smooth.x)*.07;smooth.y+=(raw.y-smooth.y)*.07;
-   const x=-smooth.x,y=-smooth.y;
+   const x=0,y=0;
    if(!reverse){
     if(throughPortal){
      source.style.transform=`translate(${(innerWidth/2-point.x)*ep}px,${(innerHeight*.45-point.y)*ep}px) scale(${1+14*ep})`;
@@ -60,21 +69,24 @@
      source.style.opacity=String(1-clamp((p-.88)/.12));
     }else{
      source.style.transform=`translate(${(centerX-point.x)*ep}px,${(centerY-point.y)*ep}px) scale(${1+6.5*ep})`;
-     source.style.opacity=String(1-clamp((p-.65)/.2));
+     source.style.opacity=String(1-clamp((p-(isWorldArrival ? .38 : .65))/.2));
     }
-    target.style.transform=`scale(${(1+.18*ep)/1.18}) translate(${x*6*(1-p)}px,${y*6*(1-p)}px)`;
-    target.style.opacity=String(clamp(p/.18));
+    const arrival=isWorldArrival?ease(clamp((p-.42)/.54)):clamp(p/.18);
+    target.style.transform=isWorldArrival?`scale(${1.16-.16*arrival}) translate(${x*6*(1-arrival)}px,${y*6*(1-arrival)}px)`:`scale(${(1+.18*ep)/1.18}) translate(${x*6*(1-p)}px,${y*6*(1-p)}px)`;
+    target.style.opacity=String(arrival);
+
    }else{
     source.style.transformOrigin='50% 45%';
-    source.style.transform=`scale(${1-.153*ep}) translate(${x*6*ep}px,${y*6*ep}px)`;
-    source.style.opacity=String(1-clamp((p-.65)/.25));
+    source.style.transform=`scale(${1-.42*ep}) translate(${x*6*ep}px,${y*6*ep}px)`;
+    source.style.opacity=String(1-ease(clamp((p-.20)/.40)));
     target.style.transform=`translate(${(centerX-point.x)*(1-ep)}px,${(centerY-point.y)*(1-ep)}px) scale(${7.5-6.5*ep})`;
-    target.style.opacity=String(clamp((p-.15)/.2));
+    target.style.opacity=String(ease(clamp((p-.44)/.42)));
     target.style.zIndex='20';source.style.zIndex='18';
    }
    sourceUI.forEach(el=>el.style.opacity=String(1-clamp(p/.22)));
    targetUI.forEach(el=>el.style.opacity=String(clamp((p-.68)/.16)));
-   if(p<1)frame=requestAnimationFrame(render);else{restore();cleanup=null;done()}
+   if(mist){const cloudProgress=clamp((p-.12)/.80);mist.style.opacity=String(Math.pow(Math.sin(Math.PI*cloudProgress),2)*.96);mist.style.transform=`scale(${1+.18*p}) translateY(${-4*p}%)`}
+   if(p<1)frame=requestAnimationFrame(render);else{mist?.remove();restore();cleanup=null;done()}
   }
   render(start);
  };
@@ -83,16 +95,18 @@
   const original=target.getAttribute('style'),sign=direction<0?-1:1;
   const width=target.getBoundingClientRect().width,radius=width*.78,depth=Math.max(900,width*1.4);
   const restore=()=>{source.remove();target.classList.remove('orbiting');if(original===null)target.removeAttribute('style');else target.setAttribute('style',original)};
-  cleanup=restore;source.classList.add('orbiting');target.classList.add('orbiting');
+  const mist=document.createElement('div');mist.className='world-arrival-mist';document.body.append(mist);
+  cleanup=()=>{mist.remove();restore()};source.classList.add('orbiting');target.classList.add('orbiting');
   for(const el of [source,target])Object.assign(el.style,{transformOrigin:'50% 50%',animation:'none',transition:'none',willChange:'transform,opacity'});
-  const start=performance.now(),duration=900;
+  const start=performance.now(),duration=1200;
   function render(now){
    const p=paused?1:clamp((now-start)/duration),ep=ease(p);
    const outgoing=ep*Math.PI/2,incoming=(1-ep)*Math.PI/2;
    source.style.transform=`perspective(${depth}px) translateX(${-sign*Math.sin(outgoing)*radius}px) translateZ(${-radius*.35*(1-Math.cos(outgoing))}px) rotateY(${-sign*outgoing*20}deg)`;
    target.style.transform=`perspective(${depth}px) translateX(${sign*Math.sin(incoming)*radius}px) translateZ(${-radius*.35*(1-Math.cos(incoming))}px) rotateY(${sign*incoming*20}deg)`;
    source.style.opacity=String(1-ep);target.style.opacity=String(ep);
-   if(p<1)frame=requestAnimationFrame(render);else{restore();cleanup=null;done()}
+   mist.style.opacity=String(Math.pow(Math.sin(Math.PI*p),2)*.75);
+   if(p<1)frame=requestAnimationFrame(render);else{mist.remove();restore();cleanup=null;done()}
   }
   render(start);
  };

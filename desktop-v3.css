@@ -1,0 +1,67 @@
+/* Shared space, transparent world artwork and physical cockpit reel. */
+body{background:#040919 url('assets/shared-space-v3.webp') center/cover fixed no-repeat}
+.cosmic-backdrop{background:transparent!important}
+body:before{content:'';position:fixed;inset:0;background:#03071855;pointer-events:none;z-index:0}
+#stars{z-index:1;opacity:.65}
+#hub .island-art{mask-image:none!important;-webkit-mask-image:none!important;background-size:contain!important;background-repeat:no-repeat;background-position:center!important}
+#hub .music-island .island-art{background-image:url('assets/music-cutout-v3.webp')}
+#hub .media-island .island-art{background-image:url('assets/media-cutout-v3.webp')}
+#hub .toys-island .island-art{background-image:url('assets/playground-cutout-v3.webp')}
+#hub .events-island .island-art{background-image:url('assets/event-central-cutout-v3.webp')}
+#hub .music-island{left:8%;top:7%;width:29%;height:40%}
+#hub .media-island{left:58%;top:7%;width:30%;height:39%}
+#hub .events-island{left:7%;top:55%;width:33%;height:33%}
+#hub .toys-island{left:61%;top:53%;width:30%;height:37%}
+#hub .island{filter:drop-shadow(0 6px 18px #00102766)}
+#hub .island:hover{filter:drop-shadow(0 0 16px #9de5ff99)}
+#cityViewport,.subworld,#subworldArt{background:transparent!important}
+#cityStage{height:100%;margin:0 auto;overflow:visible;max-width:calc(100vw - 120px)}
+#cityArt{object-fit:contain!important;mask-image:none!important;-webkit-mask-image:none!important}
+body[data-scene=music] #cityStage,body[data-scene=toys] #cityStage{width:calc(100vh - var(--dash-height) - 45px);height:calc(100% - 45px);padding:0}
+body[data-scene=events] #cityStage{width:calc((100vh - var(--dash-height) - 65px)*1.7778);height:calc(100% - 65px);margin-top:12px}
+body[data-scene=media] #cityArt{mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(transparent,#000 5%,#000 94%,transparent)!important;mask-composite:intersect;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(transparent,#000 5%,#000 94%,transparent)!important;-webkit-mask-composite:source-in}
+body[data-scene=toys] .construction-sign,body[data-scene=toys] .city-heading:after{display:none}
+/* Cylindrical selector: visible neighbouring labels, copper rims and steel pedestal. */
+#worldSelector{position:absolute;left:50%;top:-76px;transform:translateX(-50%);width:244px;height:72px;display:grid;grid-template-columns:30px minmax(0,1fr) 25px 13px;grid-template-rows:1fr;gap:0;padding:5px 3px;border:3px solid #053648;border-radius:35px;background:linear-gradient(#83d6dc 0%,#163e51 9%,#183c51 42%,#061b2d 67%,#217281 92%,#091e31);box-shadow:0 2px 0 #ed8925,0 0 0 2px #070d1f,inset 0 0 8px #58e0e5,0 6px 12px #000a;overflow:visible;isolation:isolate}
+#worldSelector:before{content:'';position:absolute;inset:3px 27px;border-left:7px ridge #ff9d40;border-right:7px ridge #ff9d40;border-radius:18px;pointer-events:none;z-index:3}
+#worldSelector:after{content:'';position:absolute;left:34%;right:34%;top:calc(100% + 1px);height:26px;clip-path:polygon(19% 0,81% 0,100% 100%,0 100%);background:linear-gradient(90deg,#071524,#0e6675 27%,#84ced0 48%,#084250 78%,#071524);border-bottom:5px ridge #db741e;border-radius:0 0 14px 14px;box-shadow:0 3px 5px #000;z-index:-1}
+.reel-cap{display:flex;align-items:center;justify-content:center;color:#e0faff;font:900 10px/1 'Space Grotesk',sans-serif;text-shadow:0 0 5px #34ffff;border:2px solid #d97828;border-radius:16px 5px 5px 16px;background:repeating-linear-gradient(0deg,#643411 0 2px,#de812f 2px 5px,#ffb657 5px 6px);box-shadow:inset 0 0 0 6px #0a3549}
+.reel-cap-right{border-radius:3px 16px 16px 3px;margin-left:2px;box-shadow:inset 0 0 0 3px #16384b}
+.reel-window{position:relative;display:flex;flex-direction:column;justify-content:center;gap:0;margin:0 5px;border:2px solid #72dcea;border-radius:15px;background:linear-gradient(#05101b,#0f344c 27%,#1b6380 46%,#16445e 67%,#06121f);box-shadow:inset 0 8px 9px #0009,inset 0 -8px 9px #000b,0 0 7px #0afaff66;perspective:140px;user-select:none;touch-action:none;cursor:grab;overflow:hidden}
+.reel-window:after{content:'';position:absolute;inset:31% 0;border-top:1px solid #8bfcff55;border-bottom:1px solid #8bfcff55;background:linear-gradient(90deg,#c1ffff15,transparent 35%,#aaffff0a);pointer-events:none}
+.reel-window strong{display:block;width:100%;font:800 15px/22px 'Barlow Condensed',sans-serif;color:#e5ffff;text-shadow:0 0 6px #70f7ff;white-space:nowrap;z-index:1}
+.reel-neighbor{display:block;height:15px;width:100%;font:700 11px/15px 'Barlow Condensed',sans-serif;color:#9fbdcb;opacity:.67;white-space:nowrap;transform:scaleY(.78)}
+.reel-buttons{display:grid;grid-template-rows:1fr 1fr;gap:2px;z-index:4;padding:3px 0}
+.reel-arrow{padding:0;border:1px solid #80d8eb;border-radius:5px;background:linear-gradient(#327fa2,#071b34);font:900 27px/18px Arial;color:#eaffff;box-shadow:0 0 4px #57c9e477;text-shadow:0 0 6px #65e7ff}
+#gpsScreen{display:flex;flex-direction:column;top:21%;height:44%;padding-top:0;padding-bottom:2px}
+.gps-top{flex:0 0 13px;min-height:13px}
+#gpsDetails{flex:1;min-height:0;display:flex;justify-content:center;align-items:center;gap:1px;padding:0 8px}
+#gpsDetails .world-description,#gpsDetails p{font-size:clamp(9px,.8vw,12px);line-height:1.12;text-align:center;flex:0 0 auto;overflow:hidden;margin:0;color:#d2e5da}
+#gpsDetails h2{font-size:clamp(10px,.95vw,14px);line-height:1.1;margin:0}
+#gpsScreen #reelEnter{flex:0 0 21px;align-self:center;width:142px;min-height:21px;padding:2px 12px;border:1px solid #96ff84;border-radius:16px;background:linear-gradient(#88f86f,#2caf38);color:#073915;box-shadow:inset 0 1px 2px #d8ffab,0 0 7px #5fd85455;font:900 11px/1 'Space Grotesk',sans-serif;letter-spacing:.03em}
+#reelEnter span{margin-right:4px}
+/* Screen-edge navigation remains outside the illustration. */
+#worldArrows{position:fixed;inset:0;z-index:32;pointer-events:none}
+#worldArrows[hidden]{display:none}
+.edge-arrow{position:absolute;top:calc((100% - var(--dash-height))/2);transform:translateY(-50%);width:54px;height:76px;pointer-events:auto;border:2px solid #8df3ff;border-radius:17px;background:linear-gradient(135deg,#152b4ce8,#0a193ccc);box-shadow:inset 0 0 8px #2097c5,0 0 15px #40d8ff55;font:900 58px/.8 Arial;color:#eaffff;text-shadow:0 0 12px #00c4ff;transition:filter .2s,scale .2s}
+.edge-arrow:hover{filter:brightness(1.3);scale:1.06}
+.edge-previous{left:15px}.edge-next{right:15px}
+.subworld-left,.subworld-right{display:none!important}
+.subworld-up{position:fixed;top:14px;left:50%;z-index:33}
+/* The sign lettering is part of each physical billboard in the approved artwork. */
+body[data-scene=media] .building span{display:none!important}
+body[data-scene=media] .building:hover i{background:#8beaff1a;box-shadow:0 0 22px #8aeaff88,inset 0 0 18px #7adfff33}
+@media(max-width:700px){#worldSelector{width:205px;top:-63px;height:62px;grid-template-columns:25px minmax(0,1fr) 23px 10px}.reel-window strong{font-size:13px}.reel-neighbor{font-size:10px;height:12px;line-height:12px}#gpsScreen #reelEnter{width:115px;flex-basis:19px;min-height:19px;font-size:9px}#cityStage{max-width:none}.edge-arrow{width:38px;height:56px;font-size:42px}.edge-previous{left:5px}.edge-next{right:5px}#hub .music-island{left:0%;width:45%;height:29%;top:15%}#hub .media-island{left:50%;width:45%;height:29%;top:15%}#hub .events-island{left:0%;top:58%;width:45%;height:27%}#hub .toys-island{left:52%;top:58%;width:43%;height:29%}}
+
+/* Artwork and interaction regions share the same frame at every aspect ratio. */
+#subworldStage{position:absolute;left:50%;top:12px;transform:translateX(-50%);width:min(calc(100vw - 140px),calc((100vh - var(--dash-height) - 72px)*1.77683));aspect-ratio:1672/941}
+#subworldArt{position:absolute;inset:0;object-fit:fill;width:100%;height:100%;max-width:none}
+#subworldHotspots{position:absolute;inset:0;width:100%;height:100%}
+body[data-scene=media] #cityArt{mask-image:none!important;-webkit-mask-image:none!important}
+body[data-scene=media] .building span{position:absolute;width:1px;height:1px;min-width:0;padding:0;overflow:hidden;clip-path:inset(50%);border:0}
+body[data-scene=silly-singles] #subworldStage{aspect-ratio:1;width:calc(100vh - var(--dash-height) - 65px);overflow:hidden}
+body[data-scene=silly-singles] #subworldArt{object-fit:contain;object-position:center!important;transform:scale(2.25);transform-origin:30% 25%;background:transparent}
+body[data-scene=silly-singles] #subworldHotspots{transform:scale(2.25);transform-origin:30% 25%}
+@media(max-width:700px){#subworldStage{width:calc(100vw - 40px);top:15%;aspect-ratio:1672/941}#subworldArt{position:absolute;min-width:0;height:100%}#subworldHotspots{min-width:0;width:100%}.subworld{overflow:hidden}body[data-scene=music] #cityStage,body[data-scene=toys] #cityStage{width:100vw;height:100vw;margin-top:40px}body[data-scene=events] #cityStage{width:100vw;height:56.3vw;margin-top:80px}}
+
+@media(min-width:701px){#cityStage,body[data-scene=music] #cityStage,body[data-scene=toys] #cityStage,body[data-scene=events] #cityStage{width:min(calc(100vw - 140px),calc((100vh - var(--dash-height) - 80px)*var(--city-ratio,1.5)));height:auto;aspect-ratio:var(--city-ratio,1.5);margin:12px auto 0;min-height:0}}
