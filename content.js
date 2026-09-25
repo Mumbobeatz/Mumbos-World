@@ -18,11 +18,11 @@ const WORLD_INFO={
 };
 const MUSIC_ORDER=['as-seen-on','event-central','silly-singles','secret-stuff'];
 const SUBWORLDS={
- 'as-seen-on':{title:'As Seen On…',image:'as-seen-on-cutout-v3',info:'The debut EP: four songs and four corners of the park.',stops:[
-  {name:'Power On',kind:'Track 1 · August 4, 2025',description:'Power On — MUMBO.',x:62,y:27,w:25,h:6,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
-  {name:'Mumbo Jumbo',kind:'Track 2 · August 4, 2025',description:'Mumbo Jumbo — MUMBO.',x:62,y:33,w:25,h:6,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
-  {name:'My Name Is (I Like to Party)',kind:'Track 3 · August 4, 2025',description:'My Name Is (I Like to Party) — MUMBO.',x:62,y:39,w:25,h:7,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
-  {name:'Berries & Cream',kind:'Track 4 · August 4, 2025',description:'Berries & Cream — MUMBO.',x:62,y:46,w:25,h:6,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
+ 'as-seen-on':{title:'As Seen On…',image:'as-seen-on-v4',info:'The debut EP: four songs and four corners of the park.',stops:[
+  {name:'Power On',kind:'Track 1 · August 4, 2025',description:'Power On — MUMBO.',x:62.5,y:29.3,w:7.5,h:3.5,tilt:5,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
+  {name:'Mumbo Jumbo',kind:'Track 2 · August 4, 2025',description:'Mumbo Jumbo — MUMBO.',x:62.5,y:33.1,w:7.5,h:3.3,tilt:5,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
+  {name:'My Name Is (I Like to Party)',kind:'Track 3 · August 4, 2025',description:'My Name Is (I Like to Party) — MUMBO.',x:62.5,y:37.2,w:7.5,h:4.2,tilt:5,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
+  {name:'Berries & Cream',kind:'Track 4 · August 4, 2025',description:'Berries & Cream — MUMBO.',x:62.5,y:41.3,w:7.5,h:3.6,tilt:5,url:'https://open.spotify.com/artist/0v4RYCckfkFu4dXWl35BXl'},
   {name:'Mumbo Jumbo Park',kind:'Amusement park',description:'Roller coasters, rides and the Mumbo Jumbo side of the EP.',x:31,y:27,w:29,h:31},
   {name:'Hot Rod Arena',kind:'Skate / BMX / motocross park',description:'Ramps, dirt-bike jumps and tracks inspired by the Hot Rod world.',x:34,y:61,w:31,h:30},
   {name:'Berries & Cream Land',kind:'Playground and courts',description:'A berry-and-candy park with swings, basketball and tennis courts.',x:78,y:65,w:30,h:31}
@@ -35,9 +35,9 @@ const SUBWORLDS={
   {name:'Silly Singles',kind:'Interactive jukebox · coming soon',description:'A future jukebox for MUMBO singles with Apple Music, Spotify, SoundCloud and YouTube links.',x:24,y:28,w:35,h:42,url:'https://soundcloud.com/mumbobeatz',label:'Browse SoundCloud'}
  ]},
  'secret-stuff':{title:'Mumbo’s Secret Stuff',image:'secret-stuff-cutout-v3',info:'SoundCloud-exclusive mashups from Mumbo’s Secret Stuff Vol. 1.',stops:[
-  {name:'GRIZTRONICS / SPACE INVADERZ / MS. JACKSON',kind:'Track 1 · SoundCloud exclusive',description:'GRiZ & Subtronics (Cyclops Remix) × Joogornot × TIKI Edit.',x:68,y:26,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'},
-  {name:'YOU & ME × TURN ON THE LIGHTS',kind:'Track 2 · SoundCloud exclusive',description:'Flume (Westend & Local Singles Remix) × Fred again.. (Z A K Edit).',x:68,y:36,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'},
-  {name:'DON’T LET ME DOWN × COLD HEARTED',kind:'Track 3 · SoundCloud exclusive',description:'Chainsmokers (Spag Heddy Remix) × Seven Lions & Kill The Noise.',x:68,y:46,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'},
-  {name:'RENEGADE MASTA',kind:'Track 4 · SoundCloud exclusive',description:'Mumbo Flip · Released May 15, 2024.',x:68,y:56,w:39,h:9,url:'https://soundcloud.com/mumbobeatz'}
+  {name:'GRIZTRONICS / SPACE INVADERZ / MS. JACKSON',kind:'Track 1 · SoundCloud exclusive',description:'GRiZ & Subtronics (Cyclops Remix) × Joogornot × TIKI Edit.',x:65.8,y:28.1,w:28.2,h:6.0,tilt:4,url:'https://soundcloud.com/mumbobeatz'},
+  {name:'YOU & ME × TURN ON THE LIGHTS',kind:'Track 2 · SoundCloud exclusive',description:'Flume (Westend & Local Singles Remix) × Fred again.. (Z A K Edit).',x:65.8,y:35.5,w:28.2,h:6.3,tilt:4,url:'https://soundcloud.com/mumbobeatz'},
+  {name:'DON’T LET ME DOWN × COLD HEARTED',kind:'Track 3 · SoundCloud exclusive',description:'Chainsmokers (Spag Heddy Remix) × Seven Lions & Kill The Noise.',x:65.8,y:42.8,w:28.2,h:6.3,tilt:4,url:'https://soundcloud.com/mumbobeatz'},
+  {name:'RENEGADE MASTA',kind:'Track 4 · SoundCloud exclusive',description:'Mumbo Flip · Released May 15, 2024.',x:65.8,y:49.7,w:28.2,h:6.0,tilt:3,url:'https://soundcloud.com/mumbobeatz'}
  ]}
 };

@@ -1,0 +1,42 @@
+/* Event Central's map destination is a globe; its stage remains the close-up. */
+#hub .events-island .island-art{background-image:url('assets/event-planet-v4.webp')}
+#hub .events-island{left:8%;top:52%;width:29%;height:39%}
+#hub .island:focus-visible{outline:0;filter:drop-shadow(0 0 17px #ce9aff)}
+/* Artwork supplies the physical cylinder; labels and controls remain interactive. */
+#worldSelector{--reel-width:clamp(310px,24vw,380px);width:var(--reel-width);height:calc(var(--reel-width)*.37105);top:calc(20px - var(--reel-width)*.37105);display:block;padding:0;border:0;border-radius:0;background:transparent url('assets/gps-housing-v4.webp') center/100% 100% no-repeat;box-shadow:none;outline:0;filter:drop-shadow(0 3px 5px #020b19aa)}
+#worldSelector:before,#worldSelector:after,.reel-cap{display:none}
+#worldSelector .reel-window{position:absolute;left:29%;top:18%;width:42%;height:43%;margin:0;padding:0;border:0;border-radius:7px;box-shadow:none;background:transparent;gap:0;overflow:hidden}
+#worldSelector .reel-window:after{inset:28% 0;border-color:#8affff3b;background:linear-gradient(90deg,transparent,#48e6ff19,transparent)}
+#worldSelector .reel-window strong{flex:0 0 44%;display:flex;align-items:center;justify-content:center;font-size:clamp(15px,1.25vw,18px);line-height:1.05;letter-spacing:-.02em;color:#ecffff;text-shadow:0 0 6px #51ecff}
+#worldSelector[data-world=toys] .reel-window strong{font-size:clamp(13px,1.1vw,16px)}
+#worldSelector .reel-neighbor{flex:0 0 28%;height:auto;display:flex;align-items:center;justify-content:center;font-size:clamp(10px,.8vw,12px);line-height:1;opacity:.72;color:#b4d5df;transform:rotateX(25deg)}
+#worldSelector .reel-buttons{position:absolute;left:79.9%;top:27%;width:7.3%;height:35%;padding:0;gap:6%;display:grid}
+#worldSelector .reel-arrow{border:0;background:transparent;box-shadow:none;color:transparent;text-shadow:none;border-radius:5px;font-size:0;min-width:0;min-height:0;padding:0}
+#worldSelector .reel-arrow:hover{background:#9bfbff29;box-shadow:0 0 8px #8df8ff66}
+#worldSelector .reel-arrow:focus-visible{outline:2px solid #c9fcff;outline-offset:1px}
+#worldSelector .reel-window:focus-visible{outline:2px solid #c9fcff;outline-offset:1px}
+/* Highlight the art under the pointer, without adding a floating label or ring. */
+.subworld-hotspot,.subworld-hotspot:hover,.subworld-hotspot:focus-visible{border:0!important;outline:0!important;box-shadow:none!important;background:transparent;border-radius:0;padding:0;transform:translate(-50%,-50%) skewY(var(--hotspot-tilt,0deg));transition:background .15s ease;}
+.subworld-hotspot span{display:none!important}
+.subworld-hotspot.track-hotspot{border-radius:3px;mix-blend-mode:screen}
+.subworld-hotspot.track-hotspot:hover,.subworld-hotspot.track-hotspot:focus-visible{background:linear-gradient(110deg,#c01effb0,#790efb99)}
+.subworld-hotspot.area-hotspot{clip-path:polygon(12% 5%,76% 0,100% 30%,92% 82%,60% 100%,11% 87%,0 35%);mix-blend-mode:screen}
+.subworld-hotspot.area-hotspot:hover,.subworld-hotspot.area-hotspot:focus-visible{background:radial-gradient(ellipse,#ac39ff66,#7418ec33 65%,transparent 90%)}
+body[data-scene=music] .building.world-gate span{display:none!important}
+body[data-scene=music] .building.world-gate i,body[data-scene=music] .building.world-gate:hover i,body[data-scene=music] .building.world-gate:focus-visible i{border:0;box-shadow:none;border-radius:0;clip-path:polygon(16% 0,84% 0,100% 42%,87% 87%,55% 100%,12% 87%,0 40%);background:transparent;mix-blend-mode:screen}
+body[data-scene=music] .building.world-gate:hover i,body[data-scene=music] .building.world-gate:focus-visible i{background:radial-gradient(ellipse,#ab38ff66,#8b26df33 65%,transparent 90%)}
+body[data-scene=music] .building.world-gate:focus-visible{outline:0}
+/* Compact the sign to reserve more vertical room for the enlarged hat. */
+.hanging-sign{top:12px;width:min(310px,34vw)}
+body[data-scene=galaxy] .entry-note{left:3%;right:auto;bottom:calc(var(--dash-height) + 12px);text-align:left}
+body[data-scene=galaxy] .entry-note span{font-size:11px}
+.orbiting{backface-visibility:hidden;will-change:transform,opacity}
+@media(max-width:700px){
+ #worldSelector{--reel-width:280px}
+ #worldSelector .reel-window strong{font-size:13px}
+ #worldSelector .reel-neighbor{font-size:9px}
+ .hanging-sign{width:min(250px,62vw);top:12px}
+ #hub .events-island{left:0;top:57%;width:45%;height:29%}
+ body[data-scene=galaxy] .entry-note{left:10px;bottom:calc(var(--dash-height) + 5px)}
+ body[data-scene=galaxy] .entry-note span{font-size:9px}
+}

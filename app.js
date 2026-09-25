@@ -9,7 +9,7 @@ function present(name){closeStop();document.querySelectorAll('.scene').forEach(e
 if(SUBWORLDS[name]){window.showSubworld?.(name);scene=$('#subworld')}else if(CITIES[name]){showCity(name);scene=$('#city')}else if(WORLDS[name]){const data=WORLDS[name];$('#worldTitle').textContent=data.title;$('#worldKicker').textContent=data.kicker;$('#worldSubtitle').textContent=data.subtitle;$('#worldBody').innerHTML=data.body();worldBackground.style.backgroundImage=`url(assets/${data.background}.webp)`;worldBackground.style.backgroundPosition=data.position||'center';worldBackground.style.backgroundSize='cover';scene=destination;scene.scrollTop=0}else scene=$('#'+name);
 scene.hidden=false;scene.classList.add('active');document.body.dataset.scene=name;window.syncWorldArrows?.(name);if(name==='galaxy')window.placeGalaxy?.();window.syncWorldSelector?.(name);document.title=(SUBWORLDS[name]?.title||CITIES[name]?.title||WORLDS[name]?.title||'Mumbo’s World')+' — MUMBO';$('#announcement').textContent=SUBWORLDS[name]?.title||CITIES[name]?.title||WORLDS[name]?.title||(name==='hub'?'Choose your world':'The bucket hat galaxy');return scene}
 function cancelTravel(){window.cancelFlight?.();travelTimers.forEach(clearTimeout);travelTimers=[];busy=false;warp.classList.remove('travel');$('#flightView').hidden=true;document.body.classList.remove('in-warp');zoomSum=0}
-function travel(name,origin,fromHistory=false){
+function travel(name,origin,fromHistory=false,orbitDirection=0){
  if(busy||name===current||!(SUBWORLDS[name]||WORLDS[name]||['galaxy','hub'].includes(name)))return;
  closeMenu();if($('#directoryDialog').open)closeDirectory();closeStop();
  busy=true;lastTravel=performance.now();zoomSum=0;
@@ -28,7 +28,8 @@ function travel(name,origin,fromHistory=false){
  if(reverse){point=name==='galaxy'?$('.portal'):name==='music'?document.querySelector(`.building[data-stop="${CITIES.music.stops.findIndex(stop=>stop.go===previous)}"]`):document.querySelector(`.island[data-go="${previous}"]`);rect=point?.getBoundingClientRect()}
  const center={x:rect?rect.left+rect.width/2:innerWidth/2,y:rect?rect.top+rect.height/2:innerHeight*.45};
  document.body.classList.add('in-warp');$('#speedReadout').textContent=reverse?'DEPARTURE':'APPROACH';
- window.runFlight(snapshot,scene,center,reverse,finish);
+ if(orbitDirection)window.runOrbit(snapshot,scene,orbitDirection,finish);
+ else window.runFlight(snapshot,scene,center,reverse,finish);
 }
 document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go)travel(go.dataset.go,go);else if(!e.target.closest('#quickNav,#menuToggle'))closeMenu()});
 document.querySelectorAll('.island').forEach(b=>{b.addEventListener('pointerenter',()=>hoveredIsland=b);b.addEventListener('pointerleave',()=>hoveredIsland=null)});
