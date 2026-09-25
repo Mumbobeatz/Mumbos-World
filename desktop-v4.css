@@ -15,6 +15,21 @@
 #worldSelector .reel-arrow:hover{background:#9bfbff29;box-shadow:0 0 8px #8df8ff66}
 #worldSelector .reel-arrow:focus-visible{outline:2px solid #c9fcff;outline-offset:1px}
 #worldSelector .reel-window:focus-visible{outline:2px solid #c9fcff;outline-offset:1px}
+/* A continuous strip lets the world names physically roll through the window. */
+#worldSelector .reel-window{display:block;perspective:320px}
+#worldSelector .reel-window>#reelPrevious,#worldSelector .reel-window>#reelWorld,#worldSelector .reel-window>#reelNext{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);white-space:nowrap}
+#worldSelector .reel-strip{position:absolute;inset:0 0 auto;width:100%;height:166.667%;transform:translateY(-20%);will-change:transform}
+#worldSelector .reel-strip.rolling{transition:transform .56s cubic-bezier(.22,.65,.24,1)}
+#worldSelector .reel-strip .reel-item{height:20%;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;font-weight:700;font-size:clamp(10px,.8vw,12px);color:#b4d5df;opacity:.7;text-shadow:0 0 5px #51ecff66;transform:rotateX(25deg);transition:font-size .56s,opacity .56s,transform .56s,color .56s}
+#worldSelector .reel-strip .reel-item:nth-child(3){font-size:clamp(15px,1.25vw,18px);letter-spacing:-.02em;color:#ecffff;opacity:1;text-shadow:0 0 6px #51ecff;transform:none}
+#worldSelector .reel-strip.rolling-down .reel-item:nth-child(3),#worldSelector .reel-strip.rolling-up .reel-item:nth-child(3){font-size:clamp(10px,.8vw,12px);color:#b4d5df;opacity:.7;transform:rotateX(25deg)}
+#worldSelector .reel-strip.rolling-down .reel-item:nth-child(4),#worldSelector .reel-strip.rolling-up .reel-item:nth-child(2){font-size:clamp(15px,1.25vw,18px);color:#ecffff;opacity:1;transform:none}
+#worldSelector[data-world=toys] .reel-strip .reel-item:nth-child(3){font-size:clamp(13px,1.1vw,16px)}
+/* Keep the dashboard labels inside its inset glass border. */
+#gpsScreen{top:calc(21% + 5px);height:calc(43% - 5px)}
+#gpsScreen .gps-top{flex-basis:19px;min-height:19px;padding:3px 7px 2px;box-sizing:border-box}
+/* A brief cloud bank masks the last part of the approach to a mini world. */
+.world-arrival-mist{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;background:radial-gradient(ellipse 70% 46% at 50% 59%,#d9fbffb0 0%,#99dff899 35%,#6689c864 60%,transparent 88%);filter:blur(34px)}
 /* Highlight the art under the pointer, without adding a floating label or ring. */
 .subworld-hotspot,.subworld-hotspot:hover,.subworld-hotspot:focus-visible{border:0!important;outline:0!important;box-shadow:none!important;background:transparent;border-radius:0;padding:0;transform:translate(-50%,-50%) skewY(var(--hotspot-tilt,0deg));transition:background .15s ease;}
 .subworld-hotspot span{display:none!important}
@@ -35,8 +50,13 @@ body[data-scene=galaxy] .entry-note span{font-size:11px}
  #worldSelector{--reel-width:280px}
  #worldSelector .reel-window strong{font-size:13px}
  #worldSelector .reel-neighbor{font-size:9px}
+ #worldSelector .reel-strip .reel-item{font-size:9px}
+ #worldSelector .reel-strip .reel-item:nth-child(3){font-size:13px}
+ #gpsScreen{top:calc(21% + 3px);height:calc(43% - 3px)}
+ #gpsScreen .gps-top{flex-basis:15px;min-height:15px;padding:2px 3px 1px}
  .hanging-sign{width:min(250px,62vw);top:12px}
  #hub .events-island{left:0;top:57%;width:45%;height:29%}
  body[data-scene=galaxy] .entry-note{left:10px;bottom:calc(var(--dash-height) + 5px)}
  body[data-scene=galaxy] .entry-note span{font-size:9px}
 }
+@media(prefers-reduced-motion:reduce){#worldSelector .reel-strip.rolling{transition:none}.world-arrival-mist{display:none}}

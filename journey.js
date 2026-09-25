@@ -46,6 +46,11 @@
   const centerX=bounds.left+bounds.width/2,centerY=bounds.top+bounds.height*.45;
   source.style.transformOrigin=`${originX}px ${originY}px`;
   Object.assign(target.style,{transformOrigin:reverse?`${targetX}px ${targetY}px`:'50% 45%',willChange:'transform,opacity',animation:'none',transition:'none'});
+  const isWorldArrival=!reverse&&(target.id==='city'||target.id==='subworld');
+  const mist=isWorldArrival?document.createElement('div'):null;
+  if(mist){mist.className='world-arrival-mist';document.body.append(mist)}
+  const previousRestore=cleanup;
+  cleanup=()=>{mist?.remove();previousRestore()};
   const start=performance.now(),duration=2400;
   function render(now){
    const p=paused?1:clamp((now-start)/duration),ep=ease(p);
@@ -60,10 +65,12 @@
      source.style.opacity=String(1-clamp((p-.88)/.12));
     }else{
      source.style.transform=`translate(${(centerX-point.x)*ep}px,${(centerY-point.y)*ep}px) scale(${1+6.5*ep})`;
-     source.style.opacity=String(1-clamp((p-.65)/.2));
+     source.style.opacity=String(1-clamp((p-(isWorldArrival ? .76 : .65))/.2));
     }
-    target.style.transform=`scale(${(1+.18*ep)/1.18}) translate(${x*6*(1-p)}px,${y*6*(1-p)}px)`;
-    target.style.opacity=String(clamp(p/.18));
+    const arrival=isWorldArrival?clamp((p-.72)/.27):clamp(p/.18);
+    target.style.transform=isWorldArrival?`scale(${1.18-.18*ease(arrival)}) translate(${x*6*(1-arrival)}px,${y*6*(1-arrival)}px)`:`scale(${(1+.18*ep)/1.18}) translate(${x*6*(1-p)}px,${y*6*(1-p)}px)`;
+    target.style.opacity=String(arrival);
+    if(isWorldArrival)target.style.filter=`blur(${(1-arrival)*9}px)`;
    }else{
     source.style.transformOrigin='50% 45%';
     source.style.transform=`scale(${1-.153*ep}) translate(${x*6*ep}px,${y*6*ep}px)`;
@@ -74,7 +81,8 @@
    }
    sourceUI.forEach(el=>el.style.opacity=String(1-clamp(p/.22)));
    targetUI.forEach(el=>el.style.opacity=String(clamp((p-.68)/.16)));
-   if(p<1)frame=requestAnimationFrame(render);else{restore();cleanup=null;done()}
+   if(mist)mist.style.opacity=String(Math.sin(Math.PI*clamp((p-.64)/.36))*.68);
+   if(p<1)frame=requestAnimationFrame(render);else{mist?.remove();restore();cleanup=null;done()}
   }
   render(start);
  };
