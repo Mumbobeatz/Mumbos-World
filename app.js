@@ -1,5 +1,5 @@
 const $=s=>document.querySelector(s),reduced=matchMedia('(prefers-reduced-motion: reduce)');
-let current='galaxy',busy=false,paused=reduced.matches,travelTimers=[],lastTravel=0,zoomSum=0,wheelTimer,lastWheel=0,hoveredIsland=null;
+let current='galaxy',busy=false,paused=reduced.matches,travelTimers=[],lastTravel=0,zoomSum=0,wheelTimer,lastWheel=0,hoveredIsland=null,travelVersion=0,lastWheelEvent=0,wheelLocked=false;
 const destination=$('#destination'),worldBackground=$('#worldBackground'),warp=$('#warp');
 function motionState(){document.body.classList.toggle('paused',paused);$('#motion').textContent=paused?'Resume motion':'Pause motion';$('#motion').setAttribute('aria-pressed',String(paused))}
 motionState();$('#motion').onclick=()=>{paused=!paused;motionState()};
@@ -8,13 +8,24 @@ $('#menuToggle').onclick=()=>{const open=$('#quickNav').hidden;$('#quickNav').hi
 function present(name){closeStop();document.querySelectorAll('.scene').forEach(el=>{el.hidden=true;el.classList.remove('active','departing','arriving','returning','retreating');el.style.transformOrigin='';el.style.transform=''});let scene;current=name;
 if(SUBWORLDS[name]){window.showSubworld?.(name);scene=$('#subworld')}else if(CITIES[name]){showCity(name);scene=$('#city')}else if(WORLDS[name]){const data=WORLDS[name];$('#worldTitle').textContent=data.title;$('#worldKicker').textContent=data.kicker;$('#worldSubtitle').textContent=data.subtitle;$('#worldBody').innerHTML=data.body();worldBackground.style.backgroundImage=`url(assets/${data.background}.webp)`;worldBackground.style.backgroundPosition=data.position||'center';worldBackground.style.backgroundSize='cover';scene=destination;scene.scrollTop=0}else scene=$('#'+name);
 scene.hidden=false;scene.classList.add('active');document.body.dataset.scene=name;window.syncWorldArrows?.(name);if(name==='galaxy')window.placeGalaxy?.();window.syncWorldSelector?.(name);document.title=(SUBWORLDS[name]?.title||CITIES[name]?.title||WORLDS[name]?.title||'Mumbo’s World')+' — MUMBO';$('#announcement').textContent=SUBWORLDS[name]?.title||CITIES[name]?.title||WORLDS[name]?.title||(name==='hub'?'Choose your world':'The bucket hat galaxy');return scene}
-function cancelTravel(){window.cancelFlight?.();travelTimers.forEach(clearTimeout);travelTimers=[];busy=false;warp.classList.remove('travel');$('#flightView').hidden=true;document.body.classList.remove('in-warp');zoomSum=0}
-function travel(name,origin,fromHistory=false,orbitDirection=0){
+function cancelTravel(){travelVersion++;window.cancelFlight?.();travelTimers.forEach(clearTimeout);travelTimers=[];busy=false;warp.classList.remove('travel');$('#flightView').hidden=true;document.body.classList.remove('in-warp');$('#speedReadout').textContent='CRUISE';zoomSum=0}
+const destinationImages=new Map();
+function readyDestination(name){
+ const data=SUBWORLDS[name]||CITIES[name];if(!data?.image)return Promise.resolve();
+ const src=`assets/${data.image}.webp`;
+ if(!destinationImages.has(src)){const image=new Image();image.src=src;destinationImages.set(src,image.decode().catch(()=>{}))}
+ return destinationImages.get(src);
+}
+async function travel(name,origin,fromHistory=false,orbitDirection=0){
  if(busy||name===current||!(SUBWORLDS[name]||WORLDS[name]||['galaxy','hub'].includes(name)))return;
  closeMenu();if($('#directoryDialog').open)closeDirectory();closeStop();
  busy=true;lastTravel=performance.now();zoomSum=0;
+ const version=++travelVersion;
+ await readyDestination(name);
+ if(version!==travelVersion)return;
  document.querySelectorAll('video').forEach(v=>v.pause());
  const previous=current,reverse=name==='galaxy'||(name==='hub'&&!!CITIES[previous])||(name==='music'&&!!SUBWORLDS[previous]);
+ if(!orbitDirection&&CITIES[previous]&&CITIES[name]){const worlds=['music','media','about','events','toys'],delta=(worlds.indexOf(name)-worlds.indexOf(previous)+worlds.length)%worlds.length;orbitDirection=delta<=worlds.length/2?1:-1}
  const finish=()=>{if(name==='galaxy')window.placeGalaxy?.();busy=false;lastTravel=performance.now();document.body.classList.remove('in-warp');$('#speedReadout').textContent='CRUISE';if(!fromHistory)history.pushState({scene:name},'','#'+name);const focus=SUBWORLDS[name]?$('#subworldTitle'):CITIES[name]?$('#cityTitle'):WORLDS[name]?$('#worldTitle'):name==='hub'?$('.music-island'):$('.portal');focus?.focus({preventScroll:true})};
  if(paused){present(name);finish();return}
  const old=$('.scene.active');
@@ -33,8 +44,8 @@ function travel(name,origin,fromHistory=false,orbitDirection=0){
 }
 document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go)travel(go.dataset.go,go);else if(!e.target.closest('#quickNav,#menuToggle'))closeMenu()});
 document.querySelectorAll('.island').forEach(b=>{b.addEventListener('pointerenter',()=>hoveredIsland=b);b.addEventListener('pointerleave',()=>hoveredIsland=null)});
-window.addEventListener('wheel',e=>{if(Math.abs(e.deltaX||0)>Math.abs(e.deltaY)||e.ctrlKey||e.target.closest('#cockpit,#directoryDialog,#quickNav'))return;if(!['galaxy','hub'].includes(current)&&!CITIES[current]&&!SUBWORLDS[current])return;const now=performance.now();if(busy||now-lastTravel<280){e.preventDefault();return}let target=null,origin=null;if(e.deltaY>0){if(current==='hub')target='galaxy';else if(SUBWORLDS[current])target='music';else if(CITIES[current])target='hub'}else if(e.deltaY<0){if(current==='galaxy'){target='hub';origin=$('.portal')}else if(current==='hub'){origin=e.target.closest('.island')||hoveredIsland;target=origin?.dataset.go}}
-if(!target)return;e.preventDefault();if(now-lastWheel>220||Math.sign(zoomSum)!==Math.sign(e.deltaY))zoomSum=0;lastWheel=now;zoomSum+=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1);clearTimeout(wheelTimer);wheelTimer=setTimeout(()=>zoomSum=0,240);if(Math.abs(zoomSum)>=65)travel(target,origin)
+window.addEventListener('wheel',e=>{if(Math.abs(e.deltaX||0)>Math.abs(e.deltaY)||e.ctrlKey||e.target.closest('#cockpit,#directoryDialog,#quickNav'))return;if(!['galaxy','hub'].includes(current)&&!CITIES[current]&&!SUBWORLDS[current])return;const now=performance.now(),quiet=now-lastWheelEvent;lastWheelEvent=now;if(busy||now-lastTravel<350){wheelLocked=true;e.preventDefault();return}if(wheelLocked&&quiet<180){e.preventDefault();return}wheelLocked=false;let target=null,origin=null;if(e.deltaY>0){if(current==='hub')target='galaxy';else if(SUBWORLDS[current])target='music';else if(CITIES[current])target='hub'}else if(e.deltaY<0){if(current==='galaxy'){target='hub';origin=$('.portal')}else if(current==='hub'){origin=e.target.closest('.island')||hoveredIsland;target=origin?.dataset.go}}
+if(!target)return;e.preventDefault();if(now-lastWheel>220||Math.sign(zoomSum)!==Math.sign(e.deltaY))zoomSum=0;lastWheel=now;zoomSum+=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1);clearTimeout(wheelTimer);wheelTimer=setTimeout(()=>zoomSum=0,240);if(Math.abs(zoomSum)>=65){wheelLocked=true;travel(target,origin)}
 },{passive:false});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#directoryDialog').open){e.preventDefault();closeDirectory()}else if(selectedStop!==null)closeStop();else if(!$('#quickNav').hidden){closeMenu();$('#menuToggle').focus()}else if(current!=='galaxy')travel(SUBWORLDS[current]?'music':current==='hub'?'galaxy':'hub')}});
 window.addEventListener('popstate',()=>{cancelTravel();const name=location.hash.slice(1)||'galaxy';present(SUBWORLDS[name]||WORLDS[name]||['galaxy','hub'].includes(name)?name:'galaxy')});
@@ -44,3 +55,8 @@ const canvas=$('#stars'),ctx=canvas.getContext('2d');let dots=[],w=innerWidth,h=
 
 // A modal occupies the browser top layer; move both the custom cursor and its trail into it.
 (()=>{const modal=document.getElementById('directoryDialog'),pointer=document.getElementById('cursor'),trail=document.getElementById('cursorSmoke');new MutationObserver(()=>{const host=modal.open?modal:document.body;host.append(trail,pointer)}).observe(modal,{attributes:true,attributeFilter:['open']})})();
+
+// Finish resize recovery in the active scene without leaving an animation lock.
+addEventListener('resize',()=>{if(busy){cancelTravel();present(current)}});
+const warmWorlds=()=>Object.keys({...CITIES,...SUBWORLDS}).forEach(readyDestination);
+if('requestIdleCallback' in window)requestIdleCallback(warmWorlds,{timeout:2000});else setTimeout(warmWorlds,500);
