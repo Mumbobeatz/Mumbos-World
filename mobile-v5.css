@@ -1,4 +1,5 @@
 /* Phone layout follows the current desktop art without changing desktop sizing. */
+#subworldMobileDetails{display:none}
 @media (max-width:700px){
   /* Bring all five destinations and their signs inside the visible map. */
   #hub .map-stage{transform:scale(.86);transform-origin:50% 44%}
@@ -25,6 +26,31 @@
   body[data-scene=secret-stuff] #subworldStage{
     width:118vw;max-width:none;top:12%;left:50%;transform:translateX(-50%);
   }
+  /* Keep both edges of the artwork visible. The small printed text has a
+     separate readable set of touch targets directly beneath the island. */
+  body[data-scene=as-seen-on] #subworldStage,
+  body[data-scene=event-central] #subworldStage{
+    width:100vw;top:12%;
+  }
+  #subworldMobileDetails{
+    display:block;position:absolute;z-index:7;left:6vw;right:6vw;
+    top:calc(12% + 56.3vw + 12px);
+    max-height:clamp(90px,18svh,150px);overflow:auto;
+    border:1px solid #83eaff99;border-radius:15px;
+    background:#08162de8;box-shadow:0 8px 22px #0008,0 0 15px #43d8ff33;
+    color:#fff5d4;padding:9px 12px;box-sizing:border-box;
+    font:700 13px/1.3 'Space Grotesk',sans-serif;
+  }
+  #subworldMobileDetails[hidden]{display:none}
+  #subworldMobileDetails>strong{display:block;margin-bottom:6px;color:#8ff0ff}
+  #subworldMobileDetails .mobile-detail-list{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  #subworldMobileDetails button{
+    min-height:32px;padding:5px 7px;border:1px solid #9a87ef88;
+    border-radius:8px;background:#332264;color:#fff;text-align:left;
+    font:600 12px/1.2 'Space Grotesk',sans-serif;
+  }
+  body[data-scene=event-central] #subworldMobileDetails .mobile-detail-list{grid-template-columns:1fr}
+  body[data-scene=event-central] #subworldMobileDetails button{min-height:42px}
   /* Silly Singles is a focused crop of the music art; the desktop 2.25x
      crop fills the entire phone with one blurry corner. */
   body[data-scene=silly-singles] #subworldStage{
@@ -61,4 +87,8 @@
   body[data-scene=as-seen-on] #subworldStage,
   body[data-scene=event-central] #subworldStage,
   body[data-scene=secret-stuff] #subworldStage{width:109vw;top:10%}
+  body[data-scene=as-seen-on] #subworldStage,
+  body[data-scene=event-central] #subworldStage{width:100vw;top:10%}
+  body[data-scene=as-seen-on] #subworldMobileDetails,
+  body[data-scene=event-central] #subworldMobileDetails{top:calc(10% + 56.3vw + 8px);max-height:110px}
 }
