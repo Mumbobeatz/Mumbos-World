@@ -1,13 +1,16 @@
 (()=>{
  const details=document.getElementById('gpsDetails'),selector=document.getElementById('worldSelector'),reelWorld=document.getElementById('reelWorld');
- const keys=['music','media','about','events','toys'];
+ const worldKeys=['music','media','about','events','toys'];
+ let keys=worldKeys;
  const labels={music:'Music Island',media:'Media Center',about:'Mumbo’s Moon',events:'Event Central',toys:'Mumbo’s Playground'};
  let selected=0,dragStart=null,wheelTotal=0,lastWheelAt=0,rolling=false,rollTimer=0;
- const topWorld=name=>SUBWORLDS[name]?'music':keys.includes(name)?name:null;
+ 
+ const topWorld=name=>keys.includes(name)?name:null;
+ Object.entries(SUBWORLDS).forEach(([key,value])=>labels[key]=value.title);
  const wheel=selector.querySelector('.reel-window');
  const strip=document.createElement('div');strip.className='reel-strip';strip.setAttribute('aria-hidden','true');wheel.append(strip);
  const wrap=i=>(i+keys.length)%keys.length;
- function showWorldInfo(key){details.innerHTML=`<p class="world-description">${WORLD_INFO[key]}</p>`}
+ function showWorldInfo(key){details.innerHTML=`<p class="world-description">${SUBWORLDS[key]?.info||WORLD_INFO[key]}</p>`}
  function render(key=keys[selected],animate=false,showInfo=true){
   clearTimeout(rollTimer);rolling=false;selected=Math.max(0,keys.indexOf(key));
   reelWorld.textContent=labels[keys[selected]];
@@ -15,17 +18,24 @@
   document.getElementById('reelNext').textContent=labels[keys[wrap(selected+1)]];
   selector.dataset.world=keys[selected];
   strip.className='reel-strip';strip.style.transform='translateY(-20%)';
-  strip.replaceChildren(...[-2,-1,0,1,2].map(offset=>{const span=document.createElement('span');span.className='reel-item';span.textContent=labels[keys[wrap(selected+offset)]];return span}));
+  strip.replaceChildren(...[-2,-1,0,1,2].map(offset=>{const span=document.createElement('span');span.className='reel-item';const label=labels[keys[wrap(selected+offset)]];span.textContent=label;if(label.length>16)span.classList.add('long-name');return span}));
   if(showInfo)showWorldInfo(keys[selected]);
+ }
+ function goToSelectedWorld(step){
+  if(busy)return;
+  const key=keys[selected];
+  if(current===key)return;
+  const origin=current==='hub'?document.querySelector(`.island[data-go="${key}"]`):selector;
+  travel(key,origin,false,step);
  }
  function rotate(step){
   if(busy||rolling)return;
   const next=wrap(selected+step);
-  if(paused||reduced.matches){render(keys[next]);return}
+  if(paused||reduced.matches){render(keys[next]);goToSelectedWorld(step);return}
   rolling=true;void strip.offsetHeight;
   strip.classList.add('rolling',step>0?'rolling-down':'rolling-up');
   strip.style.transform=`translateY(${step>0?'-40%':'0%'})`;
-  rollTimer=setTimeout(()=>render(keys[next]),570);
+  rollTimer=setTimeout(()=>{render(keys[next]);goToSelectedWorld(step)},570);
  }
  function enter(){if(busy||rolling)return;const key=keys[selected];if(current!==key){const origin=current==='hub'?document.querySelector(`.island[data-go="${key}"]`):selector;travel(key,origin)}}
  document.getElementById('reelUp').addEventListener('click',()=>rotate(-1));
@@ -38,7 +48,7 @@
  selector.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();rotate(e.key==='ArrowUp'?-1:1)}if(e.key==='Enter'&&!e.target.closest('button')){e.preventDefault();enter()}});
  window.resetGps=()=>{if(SUBWORLDS[current]){details.innerHTML=`<p class="world-description">${SUBWORLDS[current].info}</p>`;return}showWorldInfo(topWorld(current)||keys[selected])};
  window.showGpsStop=stop=>{if(!busy)details.innerHTML=`<h2>${stop.name}</h2><p>${stop.kind}</p>`};
- window.syncWorldSelector=name=>{render(topWorld(name)||keys[selected],false,false);window.resetGps()};
+ window.syncWorldSelector=name=>{keys=SUBWORLDS[name]?MUSIC_ORDER:worldKeys;render(topWorld(name)||keys[0],false,false);window.resetGps()};
  document.getElementById('gpsOpen').onclick=openDirectory;
  document.querySelectorAll('.island').forEach(island=>{const update=()=>{if(busy||current!=='hub')return;const key=island.dataset.go;if(keys.includes(key))render(key)};island.addEventListener('pointerenter',update);island.addEventListener('focus',update)});
  const knob=document.getElementById('volumeDial'),range=document.getElementById('volume');knob.setAttribute('role','slider');knob.setAttribute('tabindex','0');knob.setAttribute('aria-label','Volume');knob.setAttribute('aria-valuemin','0');knob.setAttribute('aria-valuemax','100');let drag=null;

@@ -51,11 +51,14 @@
   Object.assign(target.style,{transformOrigin:reverse?`${targetX}px ${targetY}px`:'50% 45%',willChange:'transform,opacity',animation:'none',transition:'none'});
   const isWorldArrival=!reverse&&(target.id==='city'||target.id==='subworld');
   const isWorldDeparture=reverse&&(source.dataset?.flightFrom==='city'||source.dataset?.flightFrom==='subworld');
+  // Returning from a mini island on a narrow screen should reveal the whole
+  // Music Island view, not linger on a 7.5x crop of one building.
+  const mobileMusicReturn=reverse&&innerWidth<=700&&target.id==='city'&&source.dataset?.flightFrom==='subworld';
   const mist=(isWorldArrival||isWorldDeparture)?document.createElement('div'):null;
   if(mist){mist.className='world-arrival-mist';document.body.append(mist)}
   const previousRestore=cleanup;
   cleanup=()=>{mist?.remove();previousRestore()};
-  const start=performance.now(),duration=throughPortal?2100:1800;
+  const start=performance.now(),duration=mobileMusicReturn?900:throughPortal?2100:1800;
   function render(now){
    const p=paused?1:clamp((now-start)/duration),ep=ease(p);
    smooth.x+=(raw.x-smooth.x)*.07;smooth.y+=(raw.y-smooth.y)*.07;
@@ -79,7 +82,8 @@
     source.style.transformOrigin='50% 45%';
     source.style.transform=`scale(${1-.42*ep}) translate(${x*6*ep}px,${y*6*ep}px)`;
     source.style.opacity=String(1-ease(clamp((p-.20)/.40)));
-    target.style.transform=`translate(${(centerX-point.x)*(1-ep)}px,${(centerY-point.y)*(1-ep)}px) scale(${7.5-6.5*ep})`;
+    const reverseScale=mobileMusicReturn?2.1:7.5;
+    target.style.transform=`translate(${(centerX-point.x)*(1-ep)}px,${(centerY-point.y)*(1-ep)}px) scale(${reverseScale-(reverseScale-1)*ep})`;
     target.style.opacity=String(ease(clamp((p-.44)/.42)));
     target.style.zIndex='20';source.style.zIndex='18';
    }
