@@ -12,9 +12,9 @@
   const header=document.querySelector('.hud').getBoundingClientRect();
   const panel=document.getElementById('subworldMobileDetails');
   const hasPanel=sub&&phone&&!panel.hidden;
-  const top=Math.max(85,header.bottom+14)+(sub?35:phone?60:12);
-  const bottom=Math.min(gps.top-24,innerHeight-100);
-  const reserve=hasPanel?128:current==='silly-singles'?70:0;
+  const top=phone?Math.max(85,header.bottom+14)+(sub?35:60):(sub?46:12);
+  const bottom=Math.min(gps.top-(phone?24:12),innerHeight-100);
+  const reserve=hasPanel?128:current==='silly-singles'?(phone?70:42):0;
   const ratio=current==='silly-singles'?1:sub?1672/941:data.ratio||1.5;
   const height=Math.max(60,Math.min((innerWidth-(phone?16:140))/ratio,bottom-top-reserve));
   const width=height*ratio;
