@@ -3,6 +3,7 @@
  const keys=['music','media','about','events','toys'];
  const labels={music:'Music Island',media:'Media Center',about:'Mumbo’s Moon',events:'Event Central',toys:'Mumbo’s Playground'};
  let selected=0,dragStart=null,wheelTotal=0,lastWheelAt=0,rolling=false,rollTimer=0;
+ const mobileWorldNavigation=matchMedia('(max-width:700px)');
  const topWorld=name=>SUBWORLDS[name]?'music':keys.includes(name)?name:null;
  const wheel=selector.querySelector('.reel-window');
  const strip=document.createElement('div');strip.className='reel-strip';strip.setAttribute('aria-hidden','true');wheel.append(strip);
@@ -15,17 +16,24 @@
   document.getElementById('reelNext').textContent=labels[keys[wrap(selected+1)]];
   selector.dataset.world=keys[selected];
   strip.className='reel-strip';strip.style.transform='translateY(-20%)';
-  strip.replaceChildren(...[-2,-1,0,1,2].map(offset=>{const span=document.createElement('span');span.className='reel-item';span.textContent=labels[keys[wrap(selected+offset)]];return span}));
+  strip.replaceChildren(...[-2,-1,0,1,2].map(offset=>{const span=document.createElement('span');span.className='reel-item';const label=labels[keys[wrap(selected+offset)]];span.textContent=label;if(label.length>16)span.classList.add('long-name');return span}));
   if(showInfo)showWorldInfo(keys[selected]);
+ }
+ function goToSelectedWorld(){
+  if(!mobileWorldNavigation.matches||busy)return;
+  const key=keys[selected];
+  if(current===key)return;
+  const origin=current==='hub'?document.querySelector(`.island[data-go="${key}"]`):selector;
+  travel(key,origin);
  }
  function rotate(step){
   if(busy||rolling)return;
   const next=wrap(selected+step);
-  if(paused||reduced.matches){render(keys[next]);return}
+  if(paused||reduced.matches){render(keys[next]);goToSelectedWorld();return}
   rolling=true;void strip.offsetHeight;
   strip.classList.add('rolling',step>0?'rolling-down':'rolling-up');
   strip.style.transform=`translateY(${step>0?'-40%':'0%'})`;
-  rollTimer=setTimeout(()=>render(keys[next]),570);
+  rollTimer=setTimeout(()=>{render(keys[next]);goToSelectedWorld()},570);
  }
  function enter(){if(busy||rolling)return;const key=keys[selected];if(current!==key){const origin=current==='hub'?document.querySelector(`.island[data-go="${key}"]`):selector;travel(key,origin)}}
  document.getElementById('reelUp').addEventListener('click',()=>rotate(-1));
