@@ -1,192 +1,215 @@
 /* ==========================================================================
-   MUMBO'S WORLD — THE COCKPIT
-   GPS reel, info screen, the pixel-faced copilot and Mumbo Radio.
+   MUMBO'S WORLD — THE DASHBOARD
+   One GPS controller (reel + INFO screen + Enter), the pixel copilot in the
+   left porthole, Mumbo Radio in the right porthole, and the volume knob.
    ========================================================================== */
 
-/* ---------- GPS reel + info screen ---------- */
+/* ---------- GPS ---------- */
 (() => {
-  const strip = $('#reelStrip'), win = $('#reelWindow'), info = $('#infoBody'), enterLabel = $('#enterLabel');
-  let keys = WORLD_ORDER, selected = 0, rolling = false, inspecting = null;
+  const strip = $('#reelStrip'), win = $('#reelWindow'), details = $('#gpsDetails'), enterLabel = $('#enterLabel'), live = $('#reelLive');
+  let keys = WORLD_ORDER, selected = 0, rolling = false, queued = 0, chosen = false, hovering = null, wanted = null;
   const wrap = i => (i + keys.length) % keys.length;
 
-  function render() {
-    strip.classList.remove('rolling');
+  function fill() {
+    strip.classList.remove('rolling', 'roll-up', 'roll-down');
     strip.style.transform = '';
-    strip.innerHTML = [-2, -1, 0, 1, 2].map(o => `<span class="${o === 0 ? 'now' : ''}">${esc(titleOf(keys[wrap(selected + o)]))}</span>`).join('');
-    win.setAttribute('aria-label', `GPS destination: ${titleOf(keys[selected])}`);
+    strip.innerHTML = [-2, -1, 0, 1, 2].map(o => {
+      const t = titleOf(keys[wrap(selected + o)]);
+      const cls = [o === 0 ? 'now' : '', o === -1 ? 'before' : '', o === 1 ? 'after' : '', t.length > 15 ? 'long' : ''].join(' ').trim();
+      return `<span class="${cls}">${esc(t)}</span>`;
+    }).join('');
+    live.textContent = `GPS: ${titleOf(keys[selected])}`;
     const here = keys[selected] === App.current;
-    enterLabel.textContent = App.current === 'galaxy' && !here ? 'SET COURSE' : here ? 'OPEN GUIDE' : 'ENTER WORLD';
-    if (!inspecting) describe(keys[selected]);
+    enterLabel.textContent = here ? 'OPEN INFO' : 'ENTER WORLD';
   }
-  function describe(key) {
-    const place = placeOf(key);
-    const stampMark = WORLDS[key] ? ` <span class="stamp-line" title="${App.stamps.has(key) ? 'Passport stamp collected' : 'Passport stamp waiting'}">${App.stamps.has(key) ? '★' : '☆'}</span>` : '';
-    info.innerHTML = `<p class="info-title">${esc(place.title)}${stampMark}</p><p>${esc(place.info)}</p>`;
+  function show(html) {
+    if (details.innerHTML === html) return;
+    details.innerHTML = html;
+    details.classList.remove('swap'); void details.offsetWidth; details.classList.add('swap');
+  }
+  function describe() {
+    if (hovering) { show(`<h2>${esc(hovering.name)}</h2><p>${esc(hovering.kind)}</p>`); return; }
+    const top = App.current === 'galaxy' || App.current === 'hub';
+    if (top && !chosen) { show(`<p>${esc(GPS_IDLE)}</p>`); return; }
+    const place = placeOf(keys[selected]);
+    show(`<h2>${esc(place.title)}</h2><p>${esc(place.info)}</p>`);
   }
   function sync(name) {
     keys = SUBWORLDS[name] ? MUSIC_ORDER : WORLD_ORDER;
     const i = keys.indexOf(name);
     if (i >= 0) selected = i;
-    else if (name === 'music' || !WORLDS[name]) selected = Math.max(0, selected) % keys.length;
-    inspecting = null;
-    render();
+    chosen = i >= 0; hovering = null;
+    fill(); describe();
+    $$('.planet').forEach(p => p.classList.remove('targeted'));
   }
+
+  /* The drum physically rolls: the outgoing name slides away and the incoming
+     one slides into the window, in the same direction as the input. */
   function rotate(dir) {
-    if (rolling || App.busy) return;
+    if (App.busy) return;
+    if (rolling) { queued = dir; return; }
+    rolling = true; chosen = true;
     const next = wrap(selected + dir);
-    const travelNow = depthOf(App.current) >= 2; // inside a world the reel flies you sideways
-    const done = () => {
-      selected = next; rolling = false; render();
-      if (travelNow) App.travel(keys[selected], { step: dir });
-      else if (App.current === 'hub') pulsePlanet(keys[selected]);
+    const land = () => {
+      selected = next; rolling = false; fill(); describe();
+      const inWorld = depthOf(App.current) >= 2;
+      if (inWorld) App.travel(keys[selected], { step: dir });       // inside a world the GPS flies you there
+      else $$('.planet').forEach(p => p.classList.toggle('targeted', p.dataset.go === keys[selected]));
+      if (queued && !App.busy) { const q = queued; queued = 0; rotate(q); } else queued = 0;
     };
-    if (App.paused) { done(); return; }
-    rolling = true;
-    strip.classList.add('rolling');
+    if (App.paused) { land(); return; }
+    void strip.offsetHeight;
+    strip.classList.add('rolling', dir > 0 ? 'roll-down' : 'roll-up');
     strip.style.transform = `translateY(${dir > 0 ? -40 : 0}%)`;
-    setTimeout(done, 260);
-  }
-  function pulsePlanet(key) {
-    $$('.planet').forEach(p => p.classList.toggle('targeted', p.dataset.go === key));
+    setTimeout(land, 520);
   }
   function enter() {
-    if (App.busy) return;
+    if (App.busy || rolling) return;
     const key = keys[selected];
-    if (key === App.current) { App.openGuide(); return; }
-    const origin = App.current === 'hub' ? $(`.planet[data-go="${key}"]`) : null;
-    App.travel(key, { origin, step: depthOf(App.current) === depthOf(key) ? 1 : 0 });
+    if (key === App.current) { App.openDirectory(); return; }
+    const origin = App.current === 'hub' ? (key === 'about' ? $('#moonPlanet') : $(`.planet[data-go="${key}"]`)) : null;
+    App.travel(key, { origin });
   }
 
   $('#reelUp').addEventListener('click', () => rotate(-1));
   $('#reelDown').addEventListener('click', () => rotate(1));
   $('#reelEnter').addEventListener('click', enter);
-  $('#reel').addEventListener('keydown', e => {
+  win.addEventListener('keydown', e => {
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); rotate(e.key === 'ArrowUp' ? -1 : 1); }
-    if (e.key === 'Enter' && e.target === win) { e.preventDefault(); enter(); }
+    if (e.key === 'Enter') { e.preventDefault(); enter(); }
   });
   let wheelSum = 0, wheelAt = 0;
   $('#reel').addEventListener('wheel', e => {
-    e.preventDefault();
+    e.preventDefault(); e.stopPropagation();
     const now = performance.now();
     if (now - wheelAt > 200) wheelSum = 0;
     wheelAt = now; wheelSum += e.deltaY;
-    if (Math.abs(wheelSum) > 30) { rotate(Math.sign(wheelSum)); wheelSum = 0; }
+    if (Math.abs(wheelSum) >= 28) { rotate(Math.sign(wheelSum)); wheelSum = 0; }
   }, { passive: false });
   let dragY = null;
   win.addEventListener('pointerdown', e => { dragY = e.clientY; win.setPointerCapture(e.pointerId); });
-  win.addEventListener('pointermove', e => { if (dragY === null) return; const dy = e.clientY - dragY; if (Math.abs(dy) > 22) { rotate(dy > 0 ? -1 : 1); dragY = e.clientY; } });
+  win.addEventListener('pointermove', e => { if (dragY === null) return; const dy = e.clientY - dragY; if (Math.abs(dy) >= 24) { rotate(dy > 0 ? -1 : 1); dragY = e.clientY; } });
   ['pointerup', 'pointercancel'].forEach(t => win.addEventListener(t, () => dragY = null));
 
-  App.on('scene', sync);
-  App.on('hover-world', key => { if (App.busy || App.current !== 'hub') return; selected = keys.indexOf(key); pulsePlanet(null); render(); });
-  App.on('inspect', stop => {
-    if (App.busy) return;
-    inspecting = stop;
-    if (stop) info.innerHTML = `<p class="info-title">${esc(stop.name)}</p><p>${esc(stop.kind)} · <span class="stamp-line">${stop.go ? 'click to fly in ↗' : 'click for details'}</span></p>`;
-    else render();
+  // hovering a world on the map rolls the GPS to it
+  App.on('hover-world', key => {
+    if (App.busy || App.current !== 'hub') return;
+    wanted = key;
+    if (!key) { describe(); return; }
+    const i = keys.indexOf(key);
+    if (i < 0 || rolling) return;
+    chosen = true;
+    if (i !== selected) {
+      const fwd = wrap(i - selected) <= keys.length / 2;
+      selected = wrap(i - (fwd ? 1 : -1));                      // roll the final notch so it visibly moves
+      fill(); rolling = false; rotateTo(i, fwd ? 1 : -1);
+    } else describe();
   });
-  App.on('travel-start', () => { $('#speed').textContent = 'WARP'; document.body.classList.add('warping'); });
-  App.on('arrived', key => { $('#speed').textContent = depthOf(key) >= 2 ? 'DOCKED' : 'CRUISE'; document.body.classList.remove('warping'); render(); });
+  function rotateTo(i, dir) {
+    rolling = true;
+    const land = () => {
+      selected = i; rolling = false; fill(); describe();
+      // the pointer may have moved on while the drum was turning: follow it
+      if (wanted && keys[selected] !== wanted) App.emit('hover-world', wanted);
+    };
+    if (App.paused) { land(); return; }
+    void strip.offsetHeight;
+    strip.classList.add('rolling', dir > 0 ? 'roll-down' : 'roll-up');
+    strip.style.transform = `translateY(${dir > 0 ? -40 : 0}%)`;
+    setTimeout(land, 520);
+  }
+  App.on('inspect', stop => { if (App.busy) return; hovering = stop; describe(); });
+  App.on('scene', sync);
+  App.on('travel-start', () => { $('#gpsMode').textContent = 'IN FLIGHT'; hovering = null; });
+  App.on('arrived', () => { $('#gpsMode').textContent = 'EXPLORER'; describe(); });
   sync(App.current);
 })();
 
-/* ---------- the copilot: a pixel face drawn live on its screen ---------- */
+/* ---------- copilot: a live pixel face in the left porthole ---------- */
 (() => {
   const btn = $('#copilot'), face = $('#botFace'), bubble = $('#copilotSays');
-  const EYES = {
-    neutral: ['.###.', '#####', '#####', '#####', '#####', '.###.'],
-    happy: ['.....', '.###.', '#...#', '#...#', '.....', '.....'],
-    curious: ['.###.', '#...#', '#.#.#', '#...#', '.###.', '.....'],
-    sleepy: ['.....', '.....', '.....', '#####', '.....', '.....'],
-    surprised: ['.###.', '#...#', '#...#', '#...#', '#...#', '.###.'],
-    grumpy: ['#....', '.##..', '.####', '.####', '..##.', '.....'],
-    love: ['.#.#.', '#####', '#####', '.###.', '..#..', '.....']
+  const px = cells => cells.map(([x, y, w = 1, h = 1]) => `<rect class="px" x="${x}" y="${y}" width="${w}" height="${h}"/>`).join('');
+  // eyes are drawn relative to (ex, ey); mirrored for the right eye where needed
+  const EYE = {
+    open: (x, y) => px([[x, y - 2, 4, 1], [x, y, 4, 6]]) + `<rect x="${x + 1}" y="${y + 1}" width="1" height="2" fill="#041621"/>`,
+    blink: (x, y) => px([[x, y - 2, 4, 1], [x, y + 4, 4, 1]]),
+    happy: (x, y) => px([[x - 1, y + 3], [x, y + 2], [x + 1, y + 1, 2, 1], [x + 3, y + 2], [x + 4, y + 3]]),
+    sleepy: (x, y) => px([[x - 1, y + 3, 6, 1], [x, y + 4, 4, 1]]),
+    curious: (x, y, right) => right ? EYE.open(x, y) : px([[x - 1, y - 1], [x, y - 2, 2, 1], [x + 2, y - 3], [x, y, 4, 6]]) + `<rect x="${x + 1}" y="${y + 1}" width="1" height="2" fill="#041621"/>`
   };
-  const MOUTHS = {
-    neutral: ['.......', '.#####.', '.......'],
-    happy: ['#.....#', '.#...#.', '..###..'],
-    curious: ['.......', '...#...', '.......'],
-    sleepy: ['.......', '..###..', '.......'],
-    surprised: ['..###..', '.#...#.', '..###..'],
-    grumpy: ['..###..', '.#...#.', '#.....#'],
-    love: ['#.....#', '.#...#.', '..###..']
+  const MOUTH = {
+    neutral: px([[13, 14], [14, 15, 4, 1], [18, 14]]),
+    laugh: px([[12, 12, 8, 1], [12, 13], [19, 13], [13, 14], [18, 14], [14, 15, 4, 1], [13, 13, 6, 1]]),
+    curious: px([[15, 14, 2, 1], [14, 15], [17, 15], [15, 16, 2, 1]]),
+    sleepy: px([[14, 15, 4, 1]])
   };
-  const px = (rows, ox, oy, mirror = false) => rows.flatMap((row, y) => [...(mirror ? [...row].reverse().join('') : row)].map((c, x) => c === '#' ? `<rect x="${ox + x}" y="${oy + y}" width="1" height="1"/>` : '')).join('');
-  let mood = 'neutral', look = { x: 0, y: 0 }, blinkUntil = 0, nextBlink = performance.now() + 2500, moodTimer, bubbleTimer;
-
-  let drawn = '';
+  let mood = 'neutral', look = { x: 0, y: 0 }, blinkUntil = 0, nextBlink = performance.now() + 3000, moodTimer, bubbleTimer, drawn = '';
   function draw(now) {
-    const blinking = now < blinkUntil && mood !== 'sleepy';
-    const eyes = blinking ? EYES.sleepy : EYES[mood];
-    const lx = Math.round(look.x * 1.6), ly = Math.round(look.y * 1.2);
+    const blinking = now < blinkUntil && (mood === 'neutral' || mood === 'curious');
+    const lx = Math.round(look.x * 2), ly = Math.round(look.y * 1.4);
     const key = `${mood}${blinking}${lx}${ly}`;
     if (key === drawn) return;
     drawn = key;
-    face.innerHTML = `<rect class="glass" x="0" y="0" width="24" height="16" rx="2.5"/>
-      <g class="pix" transform="translate(${lx} ${ly})">${px(eyes, 4, 2)}${px(eyes, 15, 2, mood === 'grumpy')}${px(MOUTHS[mood], 8.5, 10)}</g>
-      <rect class="scan" x="0" y="0" width="24" height="16" rx="2.5"/>`;
+    const eye = blinking ? EYE.blink : mood === 'laugh' ? EYE.happy : mood === 'sleepy' ? EYE.sleepy : mood === 'curious' ? EYE.curious : EYE.open;
+    face.innerHTML = `<g class="glow" transform="translate(${lx} ${ly})">${eye(7, 4, false)}${eye(21, 4, true)}<g transform="translate(${-lx / 2} 0)">${MOUTH[mood]}</g></g>`;
   }
-  function setMood(m, ms = 3000) {
+  function setMood(m, ms) {
     mood = m; btn.dataset.mood = m;
     clearTimeout(moodTimer);
-    if (ms) moodTimer = setTimeout(() => { mood = 'neutral'; btn.dataset.mood = 'neutral'; }, ms);
+    moodTimer = setTimeout(() => { mood = 'neutral'; btn.dataset.mood = 'neutral'; }, ms);
   }
-  function say(text, m = 'happy', ms = 6500) {
-    bubble.textContent = text; bubble.hidden = false;
-    setMood(m, Math.min(ms, 4500));
-    clearTimeout(bubbleTimer); bubbleTimer = setTimeout(() => bubble.hidden = true, ms);
-  }
+  // Existing behaviour: a click picks a fresh MUMBO phrase, laughs for 5s, bubble for 7.5s.
   let lastQuote = -1;
-  function chatter() { let i; do { i = Math.random() * COPILOT_QUOTES.length | 0; } while (i === lastQuote); lastQuote = i; say(COPILOT_QUOTES[i]); }
-
-  btn.addEventListener('click', chatter);
-  btn.addEventListener('pointerenter', () => { if (mood === 'neutral') setMood('curious', 1800); });
-
-  App.on('arrived', (key, fresh) => {
-    if (!WORLDS[key]) return;
-    if (fresh && App.stamps.size === WORLD_ORDER.length) { say('Passport complete! You’re an official Mumbonaut. ★', 'love', 8000); return; }
-    if (fresh) { say(`${WORLDS[key].arrival} New stamp: ${App.stamps.size}/5.`, 'happy'); return; }
-  });
-  App.on('sun', m => say(m === 'laugh' ? 'Haha, the sun gets it!' : 'Uh oh. Hot-headed today…', m === 'laugh' ? 'happy' : 'surprised', 3500));
-  App.on('travel-start', () => setMood('surprised', 1600));
-
-  let nextChat = performance.now() + 150000 + Math.random() * 90000, nextMood = performance.now() + 9000;
+  const interval = () => 150000 + Math.random() * 90000;      // 2½–4 minutes
+  let nextSpeech = performance.now() + interval(), nextMood = performance.now() + 7000;
+  function speak() {
+    let i; do { i = Math.random() * COPILOT_QUOTES.length | 0; } while (i === lastQuote);
+    lastQuote = i;
+    bubble.textContent = COPILOT_QUOTES[i]; bubble.hidden = false;
+    setMood('laugh', 5000);
+    clearTimeout(bubbleTimer); bubbleTimer = setTimeout(() => bubble.hidden = true, 7500);
+    nextSpeech = performance.now() + interval();
+  }
+  btn.addEventListener('click', speak);
+  btn.addEventListener('pointerenter', () => setMood('curious', 1800));
+  setInterval(() => {
+    if (document.hidden) return;
+    const now = performance.now();
+    if (now >= nextSpeech) speak();
+    if (!App.paused && now >= nextMood) { setMood(Math.random() < 0.5 ? 'laugh' : 'curious', 3200); nextMood = now + 9000 + Math.random() * 13000; }
+  }, 1000);
   App.tasks.add(now => {
     if (!App.paused) {
       const r = btn.getBoundingClientRect();
-      const tx = clamp((App.pointer.x - r.left - r.width / 2) / (innerWidth * 0.4), -1, 1), ty = clamp((App.pointer.y - r.top - r.height / 2) / (innerHeight * 0.4), -1, 1);
-      look.x = lerp(look.x, tx, 0.08); look.y = lerp(look.y, ty, 0.08);
+      const tx = clamp((App.pointer.x - r.left - r.width / 2) / (innerWidth * 0.45), -1, 1), ty = clamp((App.pointer.y - r.top - r.height / 2) / (innerHeight * 0.45), -1, 1);
+      look.x = lerp(look.x, tx, 0.075); look.y = lerp(look.y, ty, 0.075);
       if (now > nextBlink) { blinkUntil = now + 130; nextBlink = now + 2500 + Math.random() * 4000; }
-      if (now > nextMood && mood === 'neutral') { setMood(['happy', 'curious', 'sleepy'][Math.random() * 3 | 0], 2600); nextMood = now + 10000 + Math.random() * 14000; }
     }
-    if (now > nextChat) { chatter(); nextChat = now + 150000 + Math.random() * 90000; }
     draw(now);
   });
   draw(performance.now());
-  setTimeout(() => say(App.current === 'galaxy' ? 'Hey, captain! Fly into the wormhole to start.' : 'Welcome back, captain!', 'happy', 6000), 1400);
 })();
 
-/* ---------- Mumbo Radio volume knob ---------- */
+/* ---------- volume knob (drives video volume until Mumbo Radio launches) ---------- */
 (() => {
   const knob = $('#knob'), out = $('#volOut');
   let volume = store.get('volume', 70), drag = null;
+  const apply = () => $$('video').forEach(v => v.volume = volume / 100);
   function set(v) {
     volume = clamp(Math.round(v), 0, 100);
     knob.style.setProperty('--turn', `${-135 + volume * 2.7}deg`);
-    knob.setAttribute('aria-valuenow', volume); out.value = volume; out.textContent = volume;
-    $$('video').forEach(el => el.volume = volume / 100);
-    store.set('volume', volume);
+    knob.setAttribute('aria-valuenow', volume); out.textContent = volume;
+    apply(); store.set('volume', volume);
   }
   knob.addEventListener('pointerdown', e => { e.preventDefault(); drag = { y: e.clientY, v: volume }; knob.setPointerCapture(e.pointerId); });
   knob.addEventListener('pointermove', e => { if (drag) set(drag.v + (drag.y - e.clientY) * 0.7); });
   ['pointerup', 'pointercancel'].forEach(t => knob.addEventListener(t, () => drag = null));
-  knob.addEventListener('wheel', e => { e.preventDefault(); set(volume - Math.sign(e.deltaY) * 5); }, { passive: false });
+  knob.addEventListener('wheel', e => { e.preventDefault(); e.stopPropagation(); set(volume - Math.sign(e.deltaY) * 5); }, { passive: false });
   knob.addEventListener('keydown', e => {
     const map = { ArrowUp: 5, ArrowRight: 5, ArrowDown: -5, ArrowLeft: -5 };
     if (e.key in map) { e.preventDefault(); set(volume + map[e.key]); }
     if (e.key === 'Home') set(0); if (e.key === 'End') set(100);
   });
-  const apply = () => $$('video').forEach(el => el.volume = volume / 100);
-  [$('#guideBody'), $('#cardBody')].forEach(el => new MutationObserver(apply).observe(el, { childList: true }));
+  new MutationObserver(apply).observe($('#directoryBody'), { childList: true });
   set(volume);
 })();

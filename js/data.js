@@ -63,10 +63,9 @@ const COPILOT_QUOTES = [
   'Wake me when the bass drops.',
   'Big hat. Bigger universe.',
   'Beep boop. Certified bass enthusiast.',
-  'Are we there yet? Just kidding. Keep exploring!',
-  'Collect a stamp from every world, captain!',
-  'Fun fact: this whole galaxy is shaped like a hat.'
+  'Are we there yet? Just kidding. Keep exploring!'
 ];
+const GPS_IDLE = 'Where to next? Hover a world or building.';
 
 /* ---------- show helpers ---------- */
 const showDate = s => new Date(s.date + 'T23:59:59');
@@ -104,9 +103,7 @@ const WORLD_ORDER = ['music', 'media', 'about', 'events', 'toys'];
 const WORLDS = {
   music: {
     title: 'Music Island', kicker: 'The sound district', art: 'music-cutout-v3', ratio: 1,
-    info: 'Music, live sets and mixes. Four mini worlds to explore.',
-    arrival: 'Turn it up, captain!',
-    banner: 'studio',
+    info: 'Music and live sets/mixes.',
     stops: [
       { name: 'Silly Singles', kind: 'Interactive jukebox', description: 'Singles, flips and one-off releases.', x: 31, y: 26, w: 32, h: 24, go: 'silly-singles' },
       { name: 'Music & Live Sets', kind: 'Music district', description: 'Music, live sets and mixes from MUMBO.', x: 76, y: 36, w: 24, h: 22, url: LINKS.youtube, label: 'Open YouTube channel' },
@@ -133,9 +130,7 @@ const WORLDS = {
 
   media: {
     title: 'Media Center', kicker: 'The broadcast district', art: 'media-cutout-v3', ratio: 1.5,
-    info: 'The social hub. Connect with Mumbo in more ways than one!',
-    arrival: 'Broadcasting live from the hat!',
-    banner: 'media-ocean-v1',
+    info: 'The social hub, connect to Mumbo in more ways than one!',
     stops: [
       { name: 'SoundCloud Arena', kind: 'Music broadcast', description: 'Tracks, flips and mixes straight from MUMBO.', x: 34, y: 25, w: 20, h: 21, url: LINKS.soundcloud, label: 'Listen on SoundCloud' },
       { name: 'Insta Tower', kind: 'Instagram / @mumbobeatz', description: 'Show moments, new music, and whatever MUMBO is up to next.', x: 65, y: 25, w: 19, h: 22, url: LINKS.instagram, label: 'Open Instagram', image: 'live' },
@@ -156,10 +151,8 @@ const WORLDS = {
   },
 
   about: {
-    title: 'Mumbo’s Moon', kicker: 'The man in the hat', art: 'moon', ratio: 548 / 653,
-    info: 'Meet Mumbo and the man behind the bucket hat.',
-    arrival: 'Shhh… this is where the boss lives.',
-    banner: 'galaxy',
+    title: 'Mumbo’s Moon', kicker: 'The man in the hat', art: 'moon', ratio: 548 / 653, panel: true,
+    info: 'Meet Mumbo and explore the man behind the bucket hat.',
     stops: [
       { name: 'Meet MUMBO', kind: 'Ryan / San Diego', description: 'I’m Ryan, aka MUMBO—a San Diego DJ and producer with a love for heavy bass, funky house, and taking the unexpected turn.', x: 50, y: 58, w: 46, h: 34, url: LINKS.instagram, label: 'Say hi on Instagram', image: 'character' },
       { name: 'The Little Ship', kind: 'Mumbo’s ride', description: 'Every universe needs a getaway car. Bookings and hellos go through here.', x: 33, y: 24, w: 30, h: 16, url: LINKS.email, label: 'Email for bookings' }
@@ -179,8 +172,6 @@ const WORLDS = {
   events: {
     title: 'Event Central', kicker: 'The live district', art: 'event-central-cutout-v3', ratio: 16 / 9,
     info: 'Past and future Mumbo events.',
-    arrival: 'I can hear the subwoofers from here!',
-    banner: 'event-central-v2',
     stops: () => {
       const show = spotlightShow() || pastShows()[0];
       return [
@@ -201,9 +192,7 @@ const WORLDS = {
 
   toys: {
     title: 'Mumbo’s Playground', kicker: 'Under construction', art: 'playground-cutout-v3', ratio: 1,
-    info: 'All things Mumbo: merch, games, toys and much more.',
-    arrival: 'Hard hats on! Big kid energy ahead.',
-    banner: 'playground-landing-v2',
+    info: 'All things Mumbo... merch, games, toys and much more.',
     construction: [[18, 38], [45, 25], [58, 57], [25, 76], [62, 80]],
     stops: [
       { name: 'Arcade', kind: 'Coming soon', description: 'A future home for Mumbo mini-games.', x: 39, y: 22, w: 18, h: 16 },
@@ -243,11 +232,11 @@ const SUBWORLDS = {
     stops: () => WORLDS.events.stops()
   },
   'silly-singles': {
-    title: 'Silly Singles', kicker: 'Jukebox · Music Island', art: 'music-cutout-v3', ratio: 1, zoom: { scale: 2.2, x: 14, y: 4 }, lens: true,
+    title: 'Silly Singles', kicker: 'Jukebox · Music Island', art: 'music-cutout-v3', ratio: 1, zoom: { scale: 2.25, x: 16, y: 8 },
     info: 'The jukebox for singles, flips and one-off releases.',
     notice: 'Interactive jukebox coming soon.',
     stops: [
-      { name: 'Silly Singles', kind: 'Interactive jukebox · coming soon', description: 'A future jukebox for MUMBO singles with Apple Music, Spotify, SoundCloud and YouTube links.', x: 50, y: 46, w: 46, h: 46, url: LINKS.soundcloud, label: 'Browse SoundCloud' }
+      { name: 'Silly Singles', kind: 'Interactive jukebox · coming soon', description: 'A future jukebox for MUMBO singles with Apple Music, Spotify, SoundCloud and YouTube links.', x: 50, y: 46, w: 50, h: 48, url: LINKS.soundcloud, label: 'Browse SoundCloud' }
     ]
   },
   'secret-stuff': {

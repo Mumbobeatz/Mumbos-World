@@ -2,7 +2,7 @@
 
 A static site with no build step. Vercel serves the folder as it is.
 
-## Draft branch: `claude-redesign`
+## Draft branch: `claude-redesign-v2`
 
 This branch rebuilds the site. Merging it into `main` publishes it. Until then, Vercel builds a **preview** URL for the branch, and the live site stays the same.
 

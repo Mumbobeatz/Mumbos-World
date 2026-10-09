@@ -12,90 +12,84 @@
 <link rel="icon" href="assets/hat.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow+Condensed:wght@600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="css/mumbo.css?v=redesign-1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/mumbo.css?v=v2-1">
 <link rel="preload" as="image" href="assets/galaxy-v7.webp">
+<link rel="preload" as="image" href="assets/dashboard-fitted.webp">
 </head>
 <body data-scene="galaxy">
-<a class="skip" href="#cockpit">Skip to the navigation console</a>
-<canvas id="sparkles" aria-hidden="true"></canvas>
-<canvas id="warp" aria-hidden="true"></canvas>
-<img id="cursor" src="assets/cursor.webp" alt="" aria-hidden="true">
-
-<header class="hud">
-  <button class="home-mark" data-go="galaxy" aria-label="Return to the galaxy"><img src="assets/world-logo-clear.webp" alt="Mumbo’s World.TV"></button>
-  <div class="hud-right">
-    <span class="stamps" id="stampChip" title="Passport stamps: visit every world"><span aria-hidden="true">★</span> <b id="stampCount">0</b>/5</span>
-    <button id="motionToggle" class="pill" aria-pressed="false">Pause motion</button>
-    <button id="menuToggle" class="pill pill-light" aria-expanded="false" aria-controls="menu">Explore <span aria-hidden="true">☰</span></button>
-  </div>
-</header>
-
-<nav id="menu" aria-label="Quick navigation" hidden>
-  <button data-go="hub"><i style="--c:#ffd345"></i>World map</button>
-  <button data-go="music"><i style="--c:#57e8bc"></i>Music Island</button>
-  <button data-go="events"><i style="--c:#fa799c"></i>Event Central</button>
-  <button data-go="media"><i style="--c:#bd6cfa"></i>Media Center</button>
-  <button data-go="about"><i style="--c:#8f9bff"></i>Mumbo’s Moon</button>
-  <button data-go="toys"><i style="--c:#ffc96c"></i>Mumbo’s Playground</button>
-  <button data-guide><i style="--c:#fff8ea"></i>Open the world guide</button>
-</nav>
+<a class="skip" href="#gpsScreen">Skip to the GPS</a>
 
 <main id="scenes">
   <canvas id="sky" aria-hidden="true"></canvas>
+
+  <!-- HOME: the bucket hat galaxy -->
   <section id="galaxy" class="scene" aria-label="The bucket hat galaxy">
     <div class="hanging-sign" id="hangingSign"><i></i><i></i><img src="assets/world-logo-clear.webp" alt="Mumbo’s World.TV"></div>
     <div class="hat-area">
       <div class="hat" id="hat">
-        <img src="assets/galaxy-v7.webp" alt="A galaxy of blue and purple stars forming a bucket hat around a glowing central portal">
+        <img class="hat-still" src="assets/galaxy-v7.webp" alt="A galaxy of blue and purple stars forming a bucket hat around a glowing central wormhole">
         <canvas id="hatFlow" aria-hidden="true"></canvas>
+        <canvas id="hatPull" aria-hidden="true"></canvas>
         <button class="portal" data-go="hub" aria-label="Enter the wormhole">
-          <span class="portal-ring" aria-hidden="true"></span><span class="portal-ring r2" aria-hidden="true"></span>
+          <span class="portal-glow" aria-hidden="true"></span>
+          <span class="portal-label">ENTER<br>WORMHOLE</span>
         </button>
       </div>
-      <button class="enter-pill" data-go="hub">Enter the wormhole <span aria-hidden="true">↑</span></button>
-      <p class="hint">A little weird. A lot of bass. <span>Scroll up to enter · scroll down to return</span></p>
     </div>
+    <p class="entry-note">Scroll up to enter · scroll down to return</p>
     <button id="blimp" aria-label="Show news">
       <span class="blimp-inner">
+        <span class="exhaust" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         <img class="blimp-body" src="assets/show-ship.webp" alt="">
+        <img class="propeller" src="assets/propeller.webp" alt="">
         <span class="ticker" aria-hidden="true"><span id="tickerText"></span></span>
         <span class="flyer" id="blimpFlyer"><img alt=""></span>
       </span>
     </button>
   </section>
 
+  <!-- THE UNIVERSE: world map -->
   <section id="hub" class="scene" aria-label="Choose your world" hidden>
     <div class="map" id="map">
       <svg class="lanes" id="lanes" aria-hidden="true"></svg>
+      <div class="traffic" id="traffic" aria-hidden="true"></div>
       <button class="sun" id="sun" aria-label="Play with the sun">
         <img class="face neutral" src="assets/sun-neutral.webp" alt="">
         <img class="face laugh" src="assets/sun-laugh.webp" alt="">
         <img class="face angry" src="assets/sun-angry.webp" alt="">
         <span class="sun-eyes" aria-hidden="true"><i></i><i></i></span>
       </button>
-      <button class="planet" data-go="music" style="--d:0s"><img src="assets/music-cutout-v3.webp" alt=""><span class="planet-label">Music Island</span></button>
-      <button class="planet" data-go="media" style="--d:-3s"><img src="assets/media-cutout-v3.webp" alt=""><span class="planet-label">Media Center</span></button>
-      <button class="planet" data-go="events" style="--d:-6s"><img src="assets/event-planet-v4.webp" alt=""><span class="planet-label">Event Central</span></button>
-      <button class="planet" data-go="toys" style="--d:-2s"><img src="assets/playground-cutout-v3.webp" alt=""><span class="planet-label">Mumbo’s Playground</span></button>
-      <button class="planet moon" data-go="about" id="moonPlanet"><img src="assets/moon.webp" alt=""><span class="planet-label always">Mumbo’s Moon</span></button>
-      <div class="traffic" id="traffic" aria-hidden="true"></div>
-      <div class="map-caption"><h1>Pick your world.</h1><p>Hover &amp; scroll up to enter · scroll down to fly home</p></div>
+      <button class="planet" data-go="music" style="--d:0s"><span class="halo" aria-hidden="true"></span><img src="assets/music-cutout-v3.webp" alt=""></button>
+      <button class="planet" data-go="media" style="--d:-3s"><span class="halo" aria-hidden="true"></span><img src="assets/media-cutout-v3.webp" alt=""></button>
+      <button class="planet" data-go="events" style="--d:-6s"><span class="halo" aria-hidden="true"></span><img src="assets/event-planet-v4.webp" alt=""></button>
+      <button class="planet" data-go="toys" style="--d:-2s"><span class="halo" aria-hidden="true"></span><img src="assets/playground-cutout-v3.webp" alt=""></button>
+      <button class="planet moon" data-go="about" id="moonPlanet"><img src="assets/moon.webp" alt=""><span class="moon-sign">Mumbo’s Moon</span></button>
+      <div class="map-caption"><h1>Pick your world.</h1></div>
     </div>
   </section>
 </main>
 
+<!-- One template builds every world and mini world -->
 <template id="worldTemplate">
   <section class="scene world">
-    <div class="world-head">
-      <button class="pill back" data-back>← World map</button>
+    <div class="city-heading">
+      <button class="back" data-back>← World map</button>
       <p class="eyebrow"></p>
       <h1 tabindex="-1"></h1>
-      <button class="pill pill-light guide-btn" data-guide>World guide <span aria-hidden="true">✦</span></button>
     </div>
-    <div class="board-area"><div class="board"><div class="art"><img alt=""></div><div class="spots"></div><div class="life" aria-hidden="true"></div></div></div>
+    <button class="sub-up" data-back aria-label="Return to Music Island" hidden>⌃</button>
+    <div class="board-area">
+      <div class="board">
+        <span class="atmosphere" aria-hidden="true"></span>
+        <div class="art"><img alt=""></div>
+        <div class="life" aria-hidden="true"></div>
+        <div class="spots"></div>
+      </div>
+      <aside class="moon-panel" hidden></aside>
+    </div>
     <p class="world-notice" hidden></p>
-    <nav class="legend" aria-label="Places in this world"></nav>
+    <div class="mobile-list" hidden></div>
   </section>
 </template>
 
@@ -104,78 +98,74 @@
   <button class="edge next" data-step="1" aria-label="Next world">›</button>
 </nav>
 
-<section id="cockpit" aria-label="Spaceship console">
-  <svg class="dash-shell" viewBox="0 0 1600 240" preserveAspectRatio="none" aria-hidden="true">
-    <defs>
-      <linearGradient id="dashBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b3550"/><stop offset=".45" stop-color="#0d1f35"/><stop offset="1" stop-color="#060d1c"/></linearGradient>
-      <linearGradient id="dashRim" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff8a3d"/><stop offset=".22" stop-color="#3fe0d0"/><stop offset=".5" stop-color="#8be9ff"/><stop offset=".78" stop-color="#3fe0d0"/><stop offset="1" stop-color="#ff8a3d"/></linearGradient>
-      <pattern id="dashVents" width="14" height="10" patternUnits="userSpaceOnUse"><rect width="9" height="3" rx="1.5" fill="#05101e"/></pattern>
-    </defs>
-    <path d="M0 70 C 260 70 380 40 560 34 L 1040 34 C 1220 40 1340 70 1600 70 L1600 240 L0 240 Z" fill="url(#dashBody)"/>
-    <path d="M0 70 C 260 70 380 40 560 34 L 1040 34 C 1220 40 1340 70 1600 70" fill="none" stroke="url(#dashRim)" stroke-width="5"/>
-    <path d="M0 82 C 260 82 380 52 560 46 L 1040 46 C 1220 52 1340 82 1600 82" fill="none" stroke="#ffffff14" stroke-width="2"/>
-    <rect x="40" y="200" width="300" height="20" fill="url(#dashVents)" opacity=".8"/>
-    <rect x="1260" y="200" width="300" height="20" fill="url(#dashVents)" opacity=".8"/>
-    <g fill="#ff8a3d"><circle cx="70" cy="110" r="5"/><circle cx="1530" cy="110" r="5"/><circle cx="600" cy="62" r="4"/><circle cx="1000" cy="62" r="4"/></g>
-    <g fill="#3fe0d0" opacity=".7"><circle cx="90" cy="110" r="5"/><circle cx="1510" cy="110" r="5"/></g>
-    <g class="leds"><circle cx="70" cy="140" r="4"/><circle cx="88" cy="140" r="4"/><circle cx="106" cy="140" r="4"/><circle cx="124" cy="140" r="4"/><circle cx="1476" cy="140" r="4"/><circle cx="1494" cy="140" r="4"/><circle cx="1512" cy="140" r="4"/><circle cx="1530" cy="140" r="4"/></g>
-    <g fill="none" stroke="#ff8a3d" stroke-width="6" opacity=".55"><path d="M60 175 l20 -20 M84 175 l20 -20 M108 175 l20 -20 M132 175 l20 -20"/><path d="M1448 175 l20 -20 M1472 175 l20 -20 M1496 175 l20 -20 M1520 175 l20 -20"/></g>
-  </svg>
+<canvas id="warp" aria-hidden="true"></canvas>
+<canvas id="clouds" aria-hidden="true"></canvas>
 
-  <div class="dash">
-    <button id="copilot" class="copilot" aria-label="Talk to your copilot">
-      <span class="bot" aria-hidden="true">
-        <img src="assets/copilot.webp" alt="">
-        <svg class="bot-face" id="botFace" viewBox="0 0 24 16"></svg>
-      </span>
-      <span class="bubble" id="copilotSays" role="status" hidden></span>
+<header class="hud">
+  <button class="home-mark" data-go="galaxy" aria-label="Return to the galaxy"><img src="assets/world-logo-clear.webp" alt="Mumbo’s World.TV"></button>
+  <div class="hud-right">
+    <button id="motionToggle" aria-pressed="false">Pause motion</button>
+    <button id="menuToggle" aria-expanded="false" aria-controls="menu">Explore <span aria-hidden="true">☰</span></button>
+  </div>
+</header>
+<nav id="menu" aria-label="Quick navigation" hidden>
+  <button data-go="hub">World map</button>
+  <button data-go="music">Music</button>
+  <button data-go="events">Event Central</button>
+  <button data-go="media">Media &amp; socials</button>
+  <button data-go="about">Mumbo’s Moon</button>
+  <button data-go="toys">Mumbo’s Playground</button>
+  <button data-directory>Browse this world</button>
+</nav>
+
+<!-- SPACESHIP DASHBOARD -->
+<section id="cockpit" aria-label="Spaceship dashboard">
+  <div class="dash-art">
+    <div class="reel" id="reel">
+      <div class="reel-window" id="reelWindow" tabindex="0" role="group" aria-label="GPS world selector. Use up and down arrows to choose a world."><div class="reel-strip" id="reelStrip"></div></div>
+      <button class="reel-btn up" id="reelUp" aria-label="Previous world"></button>
+      <button class="reel-btn down" id="reelDown" aria-label="Next world"></button>
+      <span class="sr-only" id="reelLive" aria-live="polite"></span>
+    </div>
+
+    <button id="copilot" class="copilot" aria-label="Play with your digital copilot">
+      <svg class="face-screen" id="botFace" viewBox="0 0 32 20" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
     </button>
+    <span class="bubble" id="copilotSays" role="status" hidden></span>
 
-    <div class="console">
-      <div class="reel" id="reel" role="group" aria-label="GPS world selector. Use the arrows to choose a world.">
-        <span class="reel-tag" aria-hidden="true">GPS</span>
-        <button class="reel-btn" id="reelUp" aria-label="Previous destination">▲</button>
-        <div class="reel-window" id="reelWindow" tabindex="0" aria-live="polite"><div class="reel-strip" id="reelStrip"></div></div>
-        <button class="reel-btn" id="reelDown" aria-label="Next destination">▼</button>
-      </div>
-      <div class="screen info-screen">
-        <div class="screen-top"><button id="infoGuide" data-guide>INFO</button><span id="speed">CRUISE</span></div>
-        <div class="screen-body" id="infoBody"></div>
-        <button class="enter" id="reelEnter"><span aria-hidden="true">➤</span> <span id="enterLabel">ENTER WORLD</span></button>
-      </div>
-    </div>
+    <section id="gpsScreen" aria-label="Information screen">
+      <div class="gps-top"><button id="gpsOpen" data-directory aria-haspopup="dialog">INFO:</button><span id="gpsMode">EXPLORER</span></div>
+      <div id="gpsDetails" aria-live="polite"></div>
+      <button id="reelEnter"><span aria-hidden="true">➤</span> <span id="enterLabel">ENTER WORLD</span></button>
+    </section>
 
-    <div class="screen radio" aria-label="Mumbo Radio">
-      <strong>MUMBO RADIO</strong>
-      <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    <div class="radio-screen" aria-label="Mumbo Radio">
+      <strong>MUMBO<br>RADIO</strong>
+      <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
       <span class="radio-status">Coming soon</span>
-      <label class="knob-wrap"><span class="knob" id="knob" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70"></span><span class="vol">VOL <output id="volOut">70</output></span></label>
     </div>
+
+    <div class="volume">
+      <span class="knob" id="knob" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70"></span>
+      <span class="vol-label">VOL <output id="volOut">70</output></span>
+    </div>
+    <span class="leds" aria-hidden="true"><i></i><i></i><i></i></span>
   </div>
 </section>
 
-<aside id="guide" class="guide" aria-labelledby="guideTitle" hidden>
-  <div class="guide-banner" id="guideBanner"></div>
-  <button class="close" id="guideClose" aria-label="Close the guide">×</button>
-  <div class="guide-inner">
-    <nav class="guide-nav" id="guideNav" aria-label="All worlds"></nav>
-    <p class="eyebrow" id="guideKicker"></p>
-    <h2 id="guideTitle" tabindex="-1"></h2>
-    <div id="guideBody"></div>
-    <footer class="guide-foot"><span>MUMBO’S WORLD.TV</span><a href="mailto:mumbobeatz@gmail.com">mumbobeatz@gmail.com</a></footer>
-  </div>
-</aside>
-
-<dialog id="card" aria-labelledby="cardTitle">
-  <button class="close" id="cardClose" aria-label="Close">×</button>
-  <div id="cardBody"></div>
+<dialog id="directory" aria-labelledby="directoryTitle">
+  <button class="close" id="directoryClose" aria-label="Close">×</button>
+  <h2 id="directoryTitle"></h2>
+  <div id="directoryBody"></div>
 </dialog>
 
+<canvas id="smoke" aria-hidden="true"></canvas>
+<img id="cursor" src="assets/cursor.webp" alt="" aria-hidden="true">
 <div id="announce" class="sr-only" aria-live="polite"></div>
 
-<script src="js/data.js?v=redesign-1"></script>
-<script src="js/fx.js?v=redesign-1"></script>
-<script src="js/world.js?v=redesign-1"></script>
-<script src="js/cockpit.js?v=redesign-1"></script>
+<script src="js/data.js?v=v2-1"></script>
+<script src="js/fx.js?v=v2-1"></script>
+<script src="js/world.js?v=v2-1"></script>
+<script src="js/cockpit.js?v=v2-1"></script>
 </body>
 </html>
