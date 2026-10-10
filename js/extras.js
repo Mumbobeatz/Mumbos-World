@@ -17,68 +17,71 @@ Extras.jukebox = scene => {
   box.className = 'jukebox';
   box.innerHTML = `
     <div class="jb-cabinet">
-      <div class="jb-arch" aria-hidden="true"><i></i><i></i><i></i></div>
-      <p class="jb-marquee">SILLY SINGLES</p>
+      <span class="jb-tube l" aria-hidden="true"></span><span class="jb-tube r" aria-hidden="true"></span>
+      <div class="jb-crown" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <p class="jb-marquee">Silly Singles</p>
       <div class="jb-window">
+        <div class="jb-stack left" aria-label="Earlier songs"></div>
+        <div class="jb-stage"><span class="disc on" aria-hidden="true"><span class="disc-face"><span class="disc-label"><b class="dl-title"></b><span class="dl-hole"></span><small class="dl-by"></small></span></span></span></div>
+        <div class="jb-stack right" aria-label="Next songs"></div>
+      </div>
+      <div class="jb-strip"><div class="jb-card" aria-live="polite"><div class="jb-card-inner"></div></div></div>
+      <div class="jb-controls">
         <button class="jb-arrow prev" aria-label="Previous song">‹</button>
-        <div class="jb-discs" aria-hidden="true"></div>
+        <button class="jb-play" aria-label="Play"><span class="jb-play-icon" aria-hidden="true"></span></button>
         <button class="jb-arrow next" aria-label="Next song">›</button>
       </div>
-      <button class="jb-play" aria-label="Play"><span class="jb-play-icon" aria-hidden="true"></span></button>
-      <div class="jb-card" aria-live="polite"><div class="jb-card-inner"></div></div>
       <div class="jb-links"></div>
-      <p class="jb-count"></p>
+      <div class="jb-grille" aria-hidden="true"></div>
     </div>`;
   $('.board-area', scene).append(box);
 
-  const discs = $('.jb-discs', box), card = $('.jb-card-inner', box), links = $('.jb-links', box), count = $('.jb-count', box), play = $('.jb-play', box);
+  const left = $('.jb-stack.left', box), right = $('.jb-stack.right', box), disc = $('.disc', box), card = $('.jb-card-inner', box), links = $('.jb-links', box), play = $('.jb-play', box);
   let at = 0, playing = false, audio = null;
   const n = SINGLES.length, wrap = i => (i + n) % n;
-  discs.innerHTML = SINGLES.map((s, i) => `<span class="disc" data-i="${i}" style="--c:${s.color}"><span class="disc-face"><span class="disc-label"><b>${esc(s.title)}</b></span></span></span>`).join('');
+  const before = Math.floor((n - 1) / 2), after = n - 1 - before;
+  const spine = i => { const s = SINGLES[i]; return `<button class="spine" data-i="${i}" style="--c:${s.color}" aria-label="${esc(s.title)} by ${esc(s.artists)}"><span class="sp-ring" aria-hidden="true"></span><b>${esc(s.title)}</b><small>${esc(s.artists)}</small></button>`; };
 
   function face(s) {
     return `<p class="jb-kicker">${playing ? '▶ NOW PLAYING' : 'SELECTION ' + String(at + 1).padStart(2, '0')}</p>
       <h3>${esc(s.title)}</h3><p class="jb-by">by ${esc(s.artists)}</p><p class="jb-date">${esc(singleDate(s))}</p>`;
   }
   function render(dir = 0) {
-    $$('.disc', discs).forEach(d => {
-      let o = +d.dataset.i - at; if (o > n / 2) o -= n; if (o < -n / 2) o += n;
-      const k = Math.abs(o);
-      // jukebox carousel: the selected CD stands upright facing you; the rest
-      // stand on edge in a tight stack either side, like a real CD changer
-      const side = Math.sign(o);
-      d.style.transform = k === 0
-        ? 'translate(-50%, -50%) translateZ(40px)'
-        : `translate(-50%, -50%) translateX(${side * (58 + (k - 1) * 11)}%) rotateY(${-side * 80}deg) scale(.94)`;
-      d.style.zIndex = String(20 - k);
-      d.classList.toggle('on', k === 0);
-      d.classList.toggle('far', k > 5);
-    });
     const s = SINGLES[at];
-    const update = () => { card.innerHTML = face(s); };
-    if (dir && !App.paused) { card.parentElement.classList.remove('flip-up', 'flip-down'); void card.offsetWidth; card.parentElement.classList.add(dir > 0 ? 'flip-up' : 'flip-down'); setTimeout(update, 180); }
-    else update();
+    // flat stacks: the nearest songs sit closest to the upright disc
+    left.innerHTML = Array.from({ length: before }, (_, k) => spine(wrap(at - before + k))).join('');
+    right.innerHTML = Array.from({ length: after }, (_, k) => spine(wrap(at + 1 + k))).join('');
+    disc.style.setProperty('--c', s.color);
+    $('.dl-title', disc).textContent = s.title;
+    $('.dl-by', disc).textContent = s.artists;
+    card.innerHTML = face(s);
+    if (dir && !App.paused) {
+      disc.classList.remove('rise-l', 'rise-r'); void disc.offsetWidth; disc.classList.add(dir > 0 ? 'rise-r' : 'rise-l');
+      card.parentElement.classList.remove('flip-up', 'flip-down'); void card.offsetWidth; card.parentElement.classList.add(dir > 0 ? 'flip-up' : 'flip-down');
+    }
     links.innerHTML = `${ext(singleLink(s, 'soundcloud'), 'SoundCloud', 'btn sc')}${ext(singleLink(s, 'apple'), 'Apple Music', 'btn am')}${ext(singleLink(s, 'spotify'), 'Spotify', 'btn sp')}`;
-    count.textContent = `${at + 1} / ${n}`;
     App.emit('inspect', { name: s.title, kind: `${s.artists} · ${singleDate(s)}` });
   }
   function stop() { playing = false; box.classList.remove('playing'); play.setAttribute('aria-label', 'Play'); audio?.pause(); }
   function step(d) { stop(); at = wrap(at + d); render(d); }
   $('.prev', box).addEventListener('click', () => step(-1));
   $('.next', box).addEventListener('click', () => step(1));
-  discs.addEventListener('click', e => { const d = e.target.closest('.disc'); if (!d) return; let o = +d.dataset.i - at; if (o > n / 2) o -= n; if (o < -n / 2) o += n; if (o) step(o); });
+  [left, right].forEach(stack => stack.addEventListener('click', e => {
+    const sp = e.target.closest('.spine'); if (!sp) return;
+    let o = +sp.dataset.i - at; if (o > n / 2) o -= n; if (o < -n / 2) o += n;
+    stop(); at = +sp.dataset.i; render(Math.sign(o));
+  }));
   play.addEventListener('click', () => {
     const s = SINGLES[at];
     if (playing) { stop(); render(); return; }
     playing = true; box.classList.add('playing'); play.setAttribute('aria-label', 'Pause');
-    if (s.audio) { audio ||= new Audio(); audio.src = s.audio; audio.volume = (store.get('volume', 70)) / 100; audio.play().catch(() => {}); }
+    if (s.audio) { audio ||= new Audio(); audio.src = s.audio; audio.volume = store.get('volume', 70) / 100; audio.play().catch(() => {}); }
     render();
     if (!s.audio) card.insertAdjacentHTML('beforeend', '<p class="jb-note">Previews are coming soon. Tap a service below to listen now.</p>');
   });
   box.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); e.stopPropagation(); step(e.key === 'ArrowLeft' ? -1 : 1); }
   });
-  // leaving the scene stops any preview
   App.on('travel-start', stop);
   render();
 };
@@ -119,34 +122,39 @@ const CRATER = { x: 70.3, y: 54.9, w: 15.2 };   // the big right-hand crater, % 
    recess, a purple-steel bezel lit from the lower left like the crater rim,
    and the letter ring + push knob inside it. */
 function lockSVG() {
-  const marks = DIAL.map((l, i) => `<g transform="rotate(${i * STEP} 100 100)">
-      <line x1="100" y1="20" x2="100" y2="27" class="tick"/>
-      ${l === ' ' ? '<circle cx="100" cy="31" r="3.2" class="dot"/>' : `<text x="100" y="35.5" class="ltr">${l}</text>`}
-    </g>`).join('');
+  // fixed letter ring on the bezel; letters stay upright so every one is readable
+  const letters = DIAL.map((l, i) => {
+    const a = (i * STEP - 90) * Math.PI / 180, x = 100 + Math.cos(a) * 84, y = 100 + Math.sin(a) * 84;
+    return l === ' '
+      ? `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="3.4" class="dot" data-i="${i}"/>`
+      : `<text x="${x.toFixed(2)}" y="${(y + 4.4).toFixed(2)}" class="ltr" data-i="${i}">${l}</text>`;
+  }).join('');
+  const grips = Array.from({ length: 36 }, (_, i) => `<line x1="100" y1="31" x2="100" y2="36" transform="rotate(${i * 10} 100 100)" class="grip"/>`).join('');
   return `<svg viewBox="0 0 200 200" class="lock-svg" aria-hidden="true">
     <defs>
       <radialGradient id="recess" cx=".5" cy=".5" r=".5"><stop offset=".86" stop-color="#05030f"/><stop offset="1" stop-color="#1a0f3a" stop-opacity="0"/></radialGradient>
-      <linearGradient id="bezel" x1=".15" y1=".9" x2=".85" y2=".1"><stop offset="0" stop-color="#d9d4ff"/><stop offset=".35" stop-color="#8f87c9"/><stop offset=".7" stop-color="#433a7a"/><stop offset="1" stop-color="#231c4a"/></linearGradient>
-      <radialGradient id="face" cx=".42" cy=".6" r=".75"><stop offset="0" stop-color="#2a2540"/><stop offset="1" stop-color="#07060f"/></radialGradient>
-      <radialGradient id="knob" cx=".35" cy=".7" r=".85"><stop offset="0" stop-color="#f2efff"/><stop offset=".55" stop-color="#9c95c8"/><stop offset="1" stop-color="#3b3468"/></radialGradient>
-      <radialGradient id="shade" cx=".3" cy=".75" r=".9"><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#0b0420" stop-opacity=".75"/></radialGradient>
+      <linearGradient id="bezel" x1=".15" y1=".9" x2=".85" y2=".1"><stop offset="0" stop-color="#3a3270"/><stop offset=".5" stop-color="#1c1640"/><stop offset="1" stop-color="#0e0a26"/></linearGradient>
+      <linearGradient id="rim" x1=".15" y1=".9" x2=".85" y2=".1"><stop offset="0" stop-color="#e2ddff"/><stop offset=".45" stop-color="#8f87c9"/><stop offset="1" stop-color="#2a2356"/></linearGradient>
+      <radialGradient id="face" cx=".4" cy=".65" r=".8"><stop offset="0" stop-color="#cfcaf0"/><stop offset=".6" stop-color="#7d76b0"/><stop offset="1" stop-color="#3a3368"/></radialGradient>
+      <radialGradient id="knob" cx=".35" cy=".7" r=".85"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#b3acd9"/><stop offset="1" stop-color="#4a4280"/></radialGradient>
+      <radialGradient id="shade" cx=".3" cy=".75" r=".9"><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#0b0420" stop-opacity=".7"/></radialGradient>
     </defs>
     <circle cx="100" cy="100" r="99" fill="url(#recess)"/>
-    <circle cx="100" cy="100" r="92" fill="url(#bezel)"/>
-    <circle cx="100" cy="100" r="85" fill="#06040d"/>
+    <circle cx="100" cy="100" r="96" fill="url(#rim)"/>
+    <circle cx="100" cy="100" r="93" fill="url(#bezel)"/>
+    <g class="letters">${letters}</g>
+    <circle cx="100" cy="100" r="73" fill="#05030d"/>
     <g class="dial-ring">
-      <circle cx="100" cy="100" r="83" fill="url(#face)"/>
-      ${marks}
-      <text x="100" y="74" class="brand">MUMBO</text>
-      <text x="100" y="135" class="brand small">MOON CO.</text>
+      <circle cx="100" cy="100" r="70" fill="url(#face)" stroke="#2a2356" stroke-width="2"/>
+      ${grips}
+      <path d="M100 26 l-8 13 h16 z" class="pointer"/>
     </g>
-    <path d="M100 14 l-6 -9 h12 z" class="marker"/>
     <g class="push">
-      <circle cx="100" cy="100" r="29" fill="url(#knob)" stroke="#1c1638" stroke-width="2"/>
-      <circle cx="100" cy="100" r="22" fill="none" stroke="#ffffff55"/>
-      <text x="100" y="97" class="push-t">PUSH</text><text x="100" y="110" class="push-s">LOCK IN</text>
+      <circle cx="100" cy="100" r="27" fill="url(#knob)" stroke="#1c1638" stroke-width="2"/>
+      <circle cx="100" cy="100" r="21" fill="none" stroke="#ffffff66"/>
+      <text x="100" y="98" class="push-t">PUSH</text><text x="100" y="110" class="push-s">LOCK IN</text>
     </g>
-    <circle cx="100" cy="100" r="92" fill="url(#shade)" class="crater-shade"/>
+    <circle cx="100" cy="100" r="96" fill="url(#shade)" class="crater-shade"/>
   </svg>`;
 }
 
@@ -195,11 +203,12 @@ Extras.moon = (scene, board) => {
 
   const ring = $('.dial-ring', lock), hit = $('.dial-hit', lock), msg = $('.lock-msg', ui), readout = $('.lr-letter', ui);
   let angle = 0, entered = [], zoomed = false;
-  const index = () => ((Math.round(-angle / STEP) % DIAL.length) + DIAL.length) % DIAL.length;
+  const index = () => ((Math.round(angle / STEP) % DIAL.length) + DIAL.length) % DIAL.length;
   const show = (snap = false) => {
     ring.style.transition = snap ? 'transform .18s ease-out' : 'none';
     ring.style.transform = `rotate(${angle}deg)`;
     const l = DIAL[index()];
+    $$('.letters [data-i]', lock).forEach(el => el.classList.toggle('lit', +el.dataset.i === index()));
     readout.textContent = l === ' ' ? '·' : l;
     readout.classList.toggle('blank', l === ' ');
     hit.setAttribute('aria-valuenow', index()); hit.setAttribute('aria-valuetext', l === ' ' ? 'blank' : l);

@@ -76,6 +76,14 @@ The structure follows your brief: bucket-hat galaxy → wormhole → universe ma
 - **Media Center** is drawn larger on the map, so it reads the same size as the other worlds.
 - **Silly Singles:** works like a real CD jukebox now. The selected CD stands upright facing you, and the rest stand on edge in stacks to the left and right. They rotate into place as you flip through.
 
+## Round 5 changes
+- **Moon lock:** the letters now sit on a fixed ring around the outside of the dial and stay upright, so every one is readable. The inner dial turns and a red pointer shows the selected letter, which also lights up yellow. The extra "MUMBO / MOON CO." text is gone.
+- **Silly Singles:** a close-up of a classic neon jukebox, with a rainbow-arched crown, glowing side tubes, a chrome title strip, a big red play button and a grille.
+  - The other songs lie **flat** in stacks to the left and right, and each edge shows the song title and artist. Click an edge to pull that CD up.
+  - The chosen CD stands upright, with the title above the hole and the artist below it.
+- **Sharper world map:** the worlds were going soft for three reasons. Media Center and Playground were enlarged by stretching their pictures. The floating animation tilted each world. The hover effect zoomed in. Now they're drawn at their real size, they float straight up and down, and hover adds a glow instead of zooming. The sun no longer tilts either.
+- **Scroll fix:** scroll events that queue up during a flight, or trackpad momentum, can no longer start a second journey after you land.
+
 ## Behaviour I changed (round 1) (please check)
 
 1. **Blimp message.** The 10/2 Hurtbox show has passed, so the blimp now reads "New shows landing soon ★ Bookings: mumbobeatz@gmail.com" with a "NEW SHOWS SOON" flyer. Shows now live in one list in `js/data.js` with real dates. Add a show there and it appears on the blimp, in Event Central and in INFO, then moves to the archive by itself after the date.

@@ -399,7 +399,9 @@ addEventListener('wheel', e => {
   if (document.body.classList.contains('lock-mode')) { e.preventDefault(); return; }
   const now = performance.now(), quiet = now - wheelAt;
   wheelAt = now;
-  if (App.busy || now - (App.lastTravel || 0) < 450) { wheelLock = true; e.preventDefault(); return; }
+  // e.timeStamp is when the wheel moved, not when we got to handle it: events
+  // queued up during a flight (or trackpad momentum) must never start a new one
+  if (App.busy || now - (App.lastTravel || 0) < 450 || e.timeStamp < (App.lastTravel || 0) + 450) { wheelLock = true; e.preventDefault(); return; }
   if (wheelLock && quiet < 220) { e.preventDefault(); return; }
   wheelLock = false;
   let target = null, origin = null;
