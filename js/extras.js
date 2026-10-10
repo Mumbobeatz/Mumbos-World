@@ -44,10 +44,15 @@ Extras.jukebox = scene => {
     $$('.disc', discs).forEach(d => {
       let o = +d.dataset.i - at; if (o > n / 2) o -= n; if (o < -n / 2) o += n;
       const k = Math.abs(o);
-      d.style.transform = `translate(-50%, -50%) translateX(${o * 64}%) translateZ(${-k * 140}px) rotateY(${-Math.sign(o) * Math.min(k, 1) * 38}deg) scale(${1 - Math.min(k, 2) * 0.16})`;
-      d.style.zIndex = String(10 - k);
-      d.classList.toggle('on', o === 0);
-      d.classList.toggle('far', k > 2);
+      // jukebox carousel: the selected CD stands upright facing you; the rest
+      // stand on edge in a tight stack either side, like a real CD changer
+      const side = Math.sign(o);
+      d.style.transform = k === 0
+        ? 'translate(-50%, -50%) translateZ(40px)'
+        : `translate(-50%, -50%) translateX(${side * (58 + (k - 1) * 11)}%) rotateY(${-side * 80}deg) scale(.94)`;
+      d.style.zIndex = String(20 - k);
+      d.classList.toggle('on', k === 0);
+      d.classList.toggle('far', k > 5);
     });
     const s = SINGLES[at];
     const update = () => { card.innerHTML = face(s); };
@@ -103,42 +108,45 @@ Extras.billboard = board => {
 /* ==========================================================================
    MUMBO'S MOON — a locker-style combination dial sitting in the crater.
    Turn the dial to a letter, push it in to lock that letter into the next
-   slot, then pull the shackle. MUMBO JUMBO (rest blank) cracks the moon open.
+   slot, then open the moon. MUMBO JUMBO (rest blank) cracks the moon open.
    ========================================================================== */
 const DIAL = [' ', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];   // position 0 is the blank
 const STEP = 360 / DIAL.length;
 let moonOpen = false;   // re-locks on every visit
+const CRATER = { x: 70.3, y: 54.9, w: 15.2 };   // the big right-hand crater, % of the moon art
 
+/* The dial is drawn as if it were machined into the crater floor: a dark
+   recess, a purple-steel bezel lit from the lower left like the crater rim,
+   and the letter ring + push knob inside it. */
 function lockSVG() {
-  const marks = DIAL.map((l, i) => {
-    const a = i * STEP;
-    return `<g transform="rotate(${a} 100 160)">
-      <line x1="100" y1="${160 - 80}" x2="100" y2="${160 - 73}" class="tick"/>
-      ${l === ' ' ? '<circle cx="100" cy="91" r="3.2" class="dot"/>' : `<text x="100" y="95.5" class="ltr">${l}</text>`}
-    </g>`;
-  }).join('');
-  return `<svg viewBox="0 0 200 260" class="lock-svg" aria-hidden="true">
+  const marks = DIAL.map((l, i) => `<g transform="rotate(${i * STEP} 100 100)">
+      <line x1="100" y1="20" x2="100" y2="27" class="tick"/>
+      ${l === ' ' ? '<circle cx="100" cy="31" r="3.2" class="dot"/>' : `<text x="100" y="35.5" class="ltr">${l}</text>`}
+    </g>`).join('');
+  return `<svg viewBox="0 0 200 200" class="lock-svg" aria-hidden="true">
     <defs>
-      <linearGradient id="steel" x1="0" x2="1"><stop offset="0" stop-color="#7e8a99"/><stop offset=".35" stop-color="#f2f6fb"/><stop offset=".6" stop-color="#b9c3cf"/><stop offset="1" stop-color="#6b7684"/></linearGradient>
-      <radialGradient id="bezel" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#b8c2ce"/><stop offset="1" stop-color="#5c6773"/></radialGradient>
-      <radialGradient id="face" cx=".45" cy=".4" r=".75"><stop offset="0" stop-color="#2b2f38"/><stop offset="1" stop-color="#07080b"/></radialGradient>
-      <radialGradient id="knob" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#aeb8c4"/><stop offset="1" stop-color="#4f5965"/></radialGradient>
+      <radialGradient id="recess" cx=".5" cy=".5" r=".5"><stop offset=".86" stop-color="#05030f"/><stop offset="1" stop-color="#1a0f3a" stop-opacity="0"/></radialGradient>
+      <linearGradient id="bezel" x1=".15" y1=".9" x2=".85" y2=".1"><stop offset="0" stop-color="#d9d4ff"/><stop offset=".35" stop-color="#8f87c9"/><stop offset=".7" stop-color="#433a7a"/><stop offset="1" stop-color="#231c4a"/></linearGradient>
+      <radialGradient id="face" cx=".42" cy=".6" r=".75"><stop offset="0" stop-color="#2a2540"/><stop offset="1" stop-color="#07060f"/></radialGradient>
+      <radialGradient id="knob" cx=".35" cy=".7" r=".85"><stop offset="0" stop-color="#f2efff"/><stop offset=".55" stop-color="#9c95c8"/><stop offset="1" stop-color="#3b3468"/></radialGradient>
+      <radialGradient id="shade" cx=".3" cy=".75" r=".9"><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#0b0420" stop-opacity=".75"/></radialGradient>
     </defs>
-    <g class="shackle"><path d="M58 120 V62 a42 42 0 0 1 84 0 V120" fill="none" stroke="url(#steel)" stroke-width="17" stroke-linecap="round"/></g>
-    <circle cx="100" cy="160" r="94" fill="url(#bezel)" stroke="#3d4650" stroke-width="2"/>
-    <circle cx="100" cy="160" r="85" fill="#0d0f14"/>
+    <circle cx="100" cy="100" r="99" fill="url(#recess)"/>
+    <circle cx="100" cy="100" r="92" fill="url(#bezel)"/>
+    <circle cx="100" cy="100" r="85" fill="#06040d"/>
     <g class="dial-ring">
-      <circle cx="100" cy="160" r="82" fill="url(#face)"/>
+      <circle cx="100" cy="100" r="83" fill="url(#face)"/>
       ${marks}
-      <text x="100" y="134" class="brand">MUMBO</text>
-      <text x="100" y="196" class="brand small">MOON CO.</text>
+      <text x="100" y="74" class="brand">MUMBO</text>
+      <text x="100" y="135" class="brand small">MOON CO.</text>
     </g>
-    <path d="M100 74 l-7 -10 h14 z" class="marker"/>
+    <path d="M100 14 l-6 -9 h12 z" class="marker"/>
     <g class="push">
-      <circle cx="100" cy="160" r="30" fill="url(#knob)" stroke="#3d4650" stroke-width="2"/>
-      <circle cx="100" cy="160" r="23" fill="none" stroke="#ffffff66"/>
-      <text x="100" y="157" class="push-t">PUSH</text><text x="100" y="170" class="push-s">LOCK IN</text>
+      <circle cx="100" cy="100" r="29" fill="url(#knob)" stroke="#1c1638" stroke-width="2"/>
+      <circle cx="100" cy="100" r="22" fill="none" stroke="#ffffff55"/>
+      <text x="100" y="97" class="push-t">PUSH</text><text x="100" y="110" class="push-s">LOCK IN</text>
     </g>
+    <circle cx="100" cy="100" r="92" fill="url(#shade)" class="crater-shade"/>
   </svg>`;
 }
 
@@ -163,10 +171,10 @@ Extras.moon = (scene, board) => {
   /* ---------- the lock in the crater ---------- */
   const lock = document.createElement('div');
   lock.className = 'crater-lock';
+  lock.style.cssText = `left:${CRATER.x}%;top:${CRATER.y}%;width:${CRATER.w}%`;
   lock.innerHTML = `${lockSVG()}<button class="lock-wake" aria-label="Zoom in on the locked crater"></button>
     <span class="dial-hit" role="slider" tabindex="-1" aria-label="Letter dial" aria-valuemin="0" aria-valuemax="26"></span>
     <button class="push-hit" tabindex="-1" aria-label="Push to lock in the letter"></button>
-    <button class="shackle-hit" tabindex="-1" aria-label="Pull the shackle to open"></button>
     <span class="crater-tip">Locked…</span>`;
   board.append(lock);
   const ui = document.createElement('div');
@@ -180,7 +188,7 @@ Extras.moon = (scene, board) => {
       <button class="lb turn" data-turn="1" aria-label="Turn right">⟳</button>
     </div>
     <div class="lock-btns small">
-      <button class="lb undo">Undo</button><button class="lb clear">Clear</button><button class="lb pull">Pull to open</button><button class="lb exit">Back</button>
+      <button class="lb undo">Undo</button><button class="lb clear">Clear</button><button class="lb pull">Open the moon</button><button class="lb exit">Back</button>
     </div>
     <p class="lock-msg" aria-live="polite">Turn the dial, push to lock in each letter.</p>`;
   scene.append(ui);
@@ -206,7 +214,7 @@ Extras.moon = (scene, board) => {
     sl.classList.toggle('next', i === entered.length);
   });
   function push() {
-    if (entered.length >= MOON_SLOTS) { msg.textContent = 'All slots are full. Pull to open, or undo.'; return; }
+    if (entered.length >= MOON_SLOTS) { msg.textContent = 'All slots are full. Open the moon, or undo.'; return; }
     entered.push(DIAL[index()]);
     lock.classList.remove('pushed'); void lock.offsetWidth; lock.classList.add('pushed');
     paint();
@@ -233,11 +241,11 @@ Extras.moon = (scene, board) => {
     document.body.classList.add('lock-mode');
     ui.hidden = false;
     const r = board.getBoundingClientRect(), dashTop = $('#reel').getBoundingClientRect().top;
-    const sr = scene.getBoundingClientRect(), uiTop = sr.top + ui.offsetTop, top = $('.hud').getBoundingClientRect().bottom + 8, bottom = Math.min(dashTop, uiTop) - 14;
+    const sr = scene.getBoundingClientRect(), uiTop = sr.top + ui.offsetTop, top = $('.hud').getBoundingClientRect().bottom + 8, bottom = Math.min(dashTop, uiTop) - 26;
     const avail = Math.max(120, bottom - top);
-    const lockW = Math.min(340, innerWidth * 0.8, avail / 1.3);
-    const s = lockW / (0.15 * r.width);
-    const px = 0.69 * r.width, py = 0.547 * r.height + (0.5 - 0.615) * 0.15 * r.width * 1.3;
+    const lockW = Math.min(320, innerWidth * 0.78, avail * 0.92);
+    const s = lockW / (CRATER.w / 100 * r.width);
+    const px = CRATER.x / 100 * r.width, py = CRATER.y / 100 * r.height;
     const tx = innerWidth / 2 - r.left - px * s, ty = top + avail / 2 - r.top - py * s;
     board.style.transformOrigin = '0 0';
     board.style.transition = App.paused ? 'none' : 'transform .8s cubic-bezier(.3,.8,.3,1)';
@@ -259,7 +267,6 @@ Extras.moon = (scene, board) => {
   lock.addEventListener('pointerenter', () => { if (!zoomed) App.emit('inspect', { name: 'Locked crater', kind: 'Something is hidden in the moon…' }); });
   lock.addEventListener('pointerleave', () => { if (!zoomed) App.emit('inspect', null); });
   $('.push-hit', lock).addEventListener('click', push);
-  $('.shackle-hit', lock).addEventListener('click', pull);
   $('.push-btn', ui).addEventListener('click', push);
   $('.pull', ui).addEventListener('click', pull);
   $('.undo', ui).addEventListener('click', () => { entered.pop(); paint(); msg.textContent = 'Undone.'; });

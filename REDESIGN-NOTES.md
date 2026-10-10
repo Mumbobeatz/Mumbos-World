@@ -69,6 +69,13 @@ The structure follows your brief: bucket-hat galaxy → wormhole → universe ma
   - Pull the shackle (or press "Pull to open"). MUMBO JUMBO with the rest left blank cracks the moon open. A wrong code flashes red and clears.
   - Undo, Clear and Back (or Esc) are there too.
 
+## Round 4 changes
+- **Moon lock:** the dial is now built into the big crater. It has a dark recess, a purple-steel rim lit like the crater edge, and moon shading over it. There's no shackle any more.
+  - Click it to zoom in, turn the dial, and push the centre knob to lock in each letter.
+  - "Open the moon" checks the code. If it's right, the dial spins out and the moon cracks open.
+- **Media Center** is drawn larger on the map, so it reads the same size as the other worlds.
+- **Silly Singles:** works like a real CD jukebox now. The selected CD stands upright facing you, and the rest stand on edge in stacks to the left and right. They rotate into place as you flip through.
+
 ## Behaviour I changed (round 1) (please check)
 
 1. **Blimp message.** The 10/2 Hurtbox show has passed, so the blimp now reads "New shows landing soon ★ Bookings: mumbobeatz@gmail.com" with a "NEW SHOWS SOON" flyer. Shows now live in one list in `js/data.js` with real dates. Add a show there and it appears on the blimp, in Event Central and in INFO, then moves to the archive by itself after the date.
