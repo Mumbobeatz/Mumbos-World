@@ -47,13 +47,12 @@ function buildWorld(key) {
   const stops = stopsOf(place), spots = $('.spots', scene);
   stops.forEach((stop, i) => {
     const b = document.createElement('button');
-    b.className = 'spot' + (stop.track ? ' track' : '') + (stop.go ? ' gate' : '') + (stop.lock ? ' lock-spot' : '');
+    b.className = 'spot' + (stop.track ? ' track' : '') + (stop.go ? ' gate' : '');
     b.style.cssText = `--x:${stop.x}%;--y:${stop.y}%;--w:${stop.w || 12}%;--h:${stop.h || 10}%;--tilt:${stop.tilt || 0}deg`;
     b.dataset.stop = i;
     b.setAttribute('aria-label', `${stop.name}. ${stop.kind}${stop.go ? '. Fly in' : ''}`);
-    const labelled = !stop.go && key !== 'media' && !sub && !stop.lock;
+    const labelled = !stop.go && key !== 'media' && !sub;
     if (labelled) b.innerHTML = `<span class="tip">${esc(stop.name)}</span>`;
-    if (stop.lock) b.innerHTML = '<span class="mini-lock" aria-hidden="true"><i></i><b>ABC</b></span><span class="tip">Locked…</span>';
     spots.append(b);
   });
   const pick = e => e.target.closest('[data-stop]');
@@ -123,7 +122,6 @@ dialog.addEventListener('close', () => { $('#directoryBody').innerHTML = ''; });
 
 function openStop(stop, origin) {
   if (stop.go) { travel(stop.go, { origin }); return; }
-  if (stop.lock) { Extras.openLock(); return; }
   if (stop.news) { App.emit('show-news'); return; }
   let actions;
   if (stop.track && !stop.url) actions = chips(STREAMING);
@@ -397,7 +395,8 @@ $$('.planet').forEach(p => {
 /* Scroll up = fly in, scroll down = fly back out. One gesture, one journey. */
 let wheelSum = 0, wheelAt = 0, wheelLock = false;
 addEventListener('wheel', e => {
-  if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.target.closest('#cockpit,#directory,#menu,.moon-panel')) return;
+  if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.target.closest('#cockpit,#directory,#menu,.moon-panel,.lock-ui')) return;
+  if (document.body.classList.contains('lock-mode')) { e.preventDefault(); return; }
   const now = performance.now(), quiet = now - wheelAt;
   wheelAt = now;
   if (App.busy || now - (App.lastTravel || 0) < 450) { wheelLock = true; e.preventDefault(); return; }
@@ -418,6 +417,7 @@ addEventListener('wheel', e => {
 document.addEventListener('keydown', e => {
   if (e.target.closest('input,textarea,#reel')) return;
   if (dialog.open) return;                       // the dialog handles its own Escape
+  if (document.body.classList.contains('lock-mode')) { if (e.key === 'Escape') Extras.exitLock?.(); return; }
   if (e.key === 'Escape') {
     if (!$('#menu').hidden) { closeMenu(); $('#menuToggle').focus(); return; }
     goBack(); return;
@@ -430,7 +430,7 @@ document.addEventListener('keydown', e => {
 let touch = null;
 $('#scenes').addEventListener('pointerdown', e => { if (e.pointerType === 'touch') touch = { x: e.clientX, y: e.clientY }; });
 $('#scenes').addEventListener('pointerup', e => {
-  if (!touch || e.pointerType !== 'touch') return;
+  if (!touch || e.pointerType !== 'touch' || document.body.classList.contains('lock-mode')) { touch = null; return; }
   const dx = e.clientX - touch.x, dy = e.clientY - touch.y; touch = null;
   if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && ringOf(App.current) && !e.target.closest('.moon-panel')) step(dx < 0 ? 1 : -1);
 });

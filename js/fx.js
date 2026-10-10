@@ -431,7 +431,7 @@ const CLOUD = loadImage('assets/label-cloud.webp');
   let angle = -Math.PI * 0.62, moonHover = false;
   moon.addEventListener('pointerenter', () => moonHover = true); moon.addEventListener('pointerleave', () => moonHover = false);
   moon.addEventListener('focus', () => moonHover = true); moon.addEventListener('blur', () => moonHover = false);
-  const orbit = () => { const r = map.clientWidth / map.clientHeight; return r < 1 ? { rx: 40, ry: 9 } : r < 1.3 ? { rx: 34, ry: 8 } : { rx: 19, ry: 27 }; };
+  const orbit = () => { const r = map.clientWidth / map.clientHeight; return r < 1 ? { rx: 40, ry: 9 } : r < 1.3 ? { rx: 34, ry: 8 } : { rx: 9, ry: 27 }; };
   function placeMoon() {
     const { rx, ry } = orbit();
     moon.style.setProperty('--x', 50 + Math.cos(angle) * rx);

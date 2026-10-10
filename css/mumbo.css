@@ -121,7 +121,7 @@ body[data-scene=galaxy] .home-mark { visibility: hidden; }
 #blimp:hover .blimp-body, #blimp:focus-visible .blimp-body { filter: drop-shadow(0 0 14px #ffd34599); }
 
 /* 4. WORLD MAP ============================================================ */
-#hub .map { position: absolute; left: 0; right: 0; top: calc(var(--head-h) - 18px); bottom: calc(var(--dash-top) - 6px); container-type: size; }
+#hub .map { position: absolute; left: 0; right: 0; top: calc(var(--head-h) - 30px); bottom: calc(var(--dash-h) - 4px); container-type: size; }
 .lanes { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .lanes .lane { fill: none; stroke: #8cddff44; stroke-width: 2; stroke-dasharray: 1 8; stroke-linecap: round; }
 .lanes .orbit { fill: none; stroke: #d8c6ff33; stroke-width: 1.5; stroke-dasharray: 2 10; stroke-linecap: round; }
@@ -129,11 +129,11 @@ body[data-scene=galaxy] .home-mark { visibility: hidden; }
 .commuter { position: absolute; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; background: url('../assets/travelers.webp') 0 0 / 300% 100% no-repeat; filter: drop-shadow(0 0 4px #89dcff99); will-change: transform; }
 .commuter.jet { background-position: 50% 0; width: 22px; height: 22px; margin: -11px 0 0 -11px; }
 .commuter.walker { background-position: 100% 0; width: 17px; height: 21px; margin: -10px 0 0 -8px; }
-.planet { --s: min(29cqw, 43cqh); position: absolute; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); width: var(--s); aspect-ratio: 1; translate: -50% -50%; z-index: 4; border-radius: 50%; }
-.planet[data-go=music] { --x: 20; --y: 26; }
-.planet[data-go=media] { --x: 80; --y: 26; }
-.planet[data-go=events] { --x: 20; --y: 75; }
-.planet[data-go=toys] { --x: 80; --y: 75; }
+.planet { --s: min(37cqw, 51cqh); position: absolute; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); width: var(--s); aspect-ratio: 1; translate: -50% -50%; z-index: 4; border-radius: 50%; }
+.planet[data-go=music] { --x: 21; --y: 25; }
+.planet[data-go=media] { --x: 79; --y: 24; }
+.planet[data-go=events] { --x: 21; --y: 77; }
+.planet[data-go=toys] { --x: 79; --y: 78; }
 /* each artwork has different empty margins: scale so every world reads the same size */
 .planet[data-go=media] img { scale: 1.24; }
 .planet[data-go=toys] img { scale: 1.04; }
@@ -144,7 +144,7 @@ body[data-scene=galaxy] .home-mark { visibility: hidden; }
 .planet:hover img, .planet:focus-visible img, .planet.targeted img { filter: drop-shadow(0 0 18px #9de5ffaa); scale: 1.05; }
 .planet:hover .halo, .planet:focus-visible .halo, .planet.targeted .halo { opacity: 1; inset: 4%; }
 .planet:focus-visible { outline: none; }
-.planet.moon { --s: min(10.9cqw, 19.5cqh); aspect-ratio: 548 / 653; border-radius: 35%; z-index: 3; }
+.planet.moon { --s: min(11.5cqw, 19cqh); aspect-ratio: 548 / 653; border-radius: 35%; z-index: 3; }
 .planet.moon img { animation: none; }
 .moon-sign { position: absolute; left: 50%; top: 96%; translate: -50% 0; white-space: nowrap; padding: 5px 11px; border-radius: 999px; background: linear-gradient(#7d86e6, #545cb8); border: 2px solid #c6c4ff; color: #fff; box-shadow: 0 3px 0 #2a2d6e, 0 0 12px #8f9bff88; font: 800 clamp(12px, 1.15vw, 16px)/1 var(--display); letter-spacing: .03em; }
 .sun { position: absolute; left: 50%; top: 50%; width: min(13cqw, 23cqh); aspect-ratio: 1; translate: -50% -50%; z-index: 5; border-radius: 50%; animation: sun-bob 8s ease-in-out infinite; }
@@ -171,7 +171,8 @@ body[data-scene=galaxy] .home-mark { visibility: hidden; }
   .map-caption { display: none; }
 }
 @container (orientation: portrait) {
-  .planet { --s: min(48cqw, 37cqh); }
+  .planet { --s: min(46cqw, 36cqh); }
+  .planet[data-go=media] img { scale: 1.12; }
   .planet[data-go=music] { --x: 26; --y: 21; }
   .planet[data-go=media] { --x: 75; --y: 22; }
   .planet[data-go=events] { --x: 25; --y: 79; }
@@ -555,19 +556,12 @@ body.traveling .city-heading, body.traveling #edgeArrows, body.traveling .world-
 @keyframes flip-down { 0% { transform: rotateX(0); } 50% { transform: rotateX(-90deg); } 100% { transform: rotateX(0); } }
 
 /* ---------- Mumbo's Moon: crater lock + cracking open ---------- */
-.lock-spot { border-radius: 50%; display: grid; place-items: center; }
-.mini-lock { position: relative; width: 42%; aspect-ratio: .8; margin-top: 12%; animation: lock-wiggle 4s ease-in-out infinite; filter: drop-shadow(0 0 8px #b46bffaa) drop-shadow(0 3px 3px #000c); }
-.mini-lock i { position: absolute; left: 20%; right: 20%; top: -38%; height: 52%; border: 4px solid #c9d5e6; border-bottom: 0; border-radius: 99px 99px 0 0; }
-.mini-lock b { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 22%; background: linear-gradient(#ffd96a, #d99a1e); border: 2px solid #7a4a0a; font: 900 clamp(7px, .75vw, 11px)/1 var(--display); color: #4a2a04; letter-spacing: .05em; }
-.lock-spot:hover .mini-lock, .lock-spot:focus-visible .mini-lock { animation: lock-wiggle .5s ease-in-out infinite; }
-.lock-spot .tip { bottom: 92%; }
 .board .art .moon-lid, .moon-glow { display: none; }
 .board.cracked .art .moon-lid { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2; filter: drop-shadow(0 -10px 24px #000c);
   clip-path: polygon(0 0, 100% 0, 100% 63%, 94% 60%, 87% 65%, 78% 60%, 69% 64%, 60% 59%, 51% 64%, 42% 60%, 33% 65%, 24% 60%, 15% 64%, 8% 59%, 0 62%);
   transform-origin: 12% 62%; animation: lid-open 1.4s cubic-bezier(.3, 1.4, .4, 1) forwards; }
 .board.cracked .moon-base { clip-path: polygon(0 62%, 8% 59%, 15% 64%, 24% 60%, 33% 65%, 42% 60%, 51% 64%, 60% 59%, 69% 64%, 78% 60%, 87% 65%, 94% 60%, 100% 63%, 100% 100%, 0 100%); }
 .board.cracked .moon-glow { display: block; position: absolute; left: 10%; right: 10%; top: 48%; height: 26%; z-index: 1; border-radius: 50%; background: radial-gradient(ellipse, #ffffff 0 12%, #9ff3ff 30%, #b46bff88 55%, transparent 72%); filter: blur(4px); animation: glow-in 1.2s .2s both ease-out, breathe 3s 1.4s ease-in-out infinite; }
-.board.cracked .lock-spot { display: none; }
 .board.instant .art .moon-lid, .board.instant .moon-glow, .board.instant .secret-folder { animation-duration: .01s; animation-delay: 0s; }
 .board.shaking { animation: moon-shake .6s linear; }
 .secret-folder { position: absolute; left: 50%; top: 58%; z-index: 5; display: none; translate: -50% -50%; flex-direction: column; align-items: center; gap: 4px; font: 900 clamp(12px, 1.2vw, 16px)/1 var(--display); letter-spacing: .08em; color: #fff; text-shadow: 0 2px 4px #000, 0 0 10px #8be9ff; }
@@ -580,31 +574,64 @@ body.traveling .city-heading, body.traveling #edgeArrows, body.traveling .world-
 @keyframes lid-open { from { transform: none; } to { transform: translateY(-15%) rotate(-13deg); } }
 @keyframes glow-in { from { opacity: 0; transform: scaleX(.2); } }
 @keyframes folder-pop { from { opacity: 0; scale: .2; translate: -50% 10%; } }
+/* ---------- the combination dial in the crater ---------- */
+.crater-lock { position: absolute; left: 69%; top: 54.7%; width: 15%; translate: -50% -61.5%; z-index: 4; filter: drop-shadow(0 3px 4px #000c) drop-shadow(0 0 8px #b46bff88); animation: lock-idle 4s ease-in-out infinite; }
+.lock-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.lock-svg .tick { stroke: #e9eef5; stroke-width: 1.6; }
+.lock-svg .dot { fill: #ffd345; }
+.lock-svg .ltr { fill: #f4f6fb; font: 800 13px var(--display); text-anchor: middle; }
+.lock-svg .brand { fill: #c9d2de; font: 800 9px var(--font); letter-spacing: .25em; text-anchor: middle; }
+.lock-svg .brand.small { font-size: 6px; letter-spacing: .3em; fill: #7d8796; }
+.lock-svg .marker { fill: #ff5f7e; stroke: #3d0b16; stroke-width: 1; }
+.lock-svg .push-t { fill: #2b3440; font: 900 11px var(--display); letter-spacing: .08em; text-anchor: middle; }
+.lock-svg .push-s { fill: #4d5866; font: 800 6.5px var(--font); letter-spacing: .14em; text-anchor: middle; }
+.lock-svg .push { transform-origin: 100px 160px; transition: transform .12s; }
+.lock-svg .shackle { transition: transform .45s cubic-bezier(.3, 1.6, .5, 1); }
+.dial-ring { transform-origin: 100px 160px; }
+.crater-lock.pushed .push { animation: push-in .32s ease-out; }
+.crater-lock.open .shackle { transform: translateY(-34px); }
+.crater-lock.open { animation: lock-pop 1s .35s ease-in forwards; }
+.crater-lock.nope { animation: moon-shake .45s linear; }
+.crater-lock.tick .marker { animation: tick .12s; }
+.lock-wake, .dial-hit, .push-hit, .shackle-hit { position: absolute; display: block; padding: 0; border: 0; background: none; }
+.lock-wake { inset: 0; border-radius: 40%; cursor: zoom-in; }
+.dial-hit { left: 3%; right: 3%; top: 25.4%; aspect-ratio: 1; border-radius: 50%; display: none; cursor: grab; touch-action: none; }
+.dial-hit:active { cursor: grabbing; }
+.push-hit { left: 35%; top: 50%; width: 30%; aspect-ratio: 1; border-radius: 50%; display: none; cursor: pointer; }
+.shackle-hit { left: 25%; top: 2%; width: 50%; height: 26%; border-radius: 50% 50% 0 0; display: none; cursor: pointer; }
+.crater-tip { position: absolute; left: 50%; bottom: 104%; translate: -50% 0; padding: 4px 9px; border-radius: 10px; background: #081128ee; border: 2px solid #81e9ff; color: #fff4c9; font: 800 12px var(--display); white-space: nowrap; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.crater-lock:hover .crater-tip { opacity: 1; }
+body.lock-mode .crater-lock { animation: none; filter: drop-shadow(0 2px 3px #000c); }
+body.lock-mode .lock-wake, body.lock-mode .crater-tip { display: none; }
+body.lock-mode .dial-hit, body.lock-mode .push-hit, body.lock-mode .shackle-hit { display: block; }
+.dial-hit:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+body.lock-mode .world[data-place=about] .board-area { overflow: visible; }
+body.lock-mode .moon-panel, body.lock-mode .city-heading, body.lock-mode #edgeArrows, body.lock-mode .flyby { opacity: 0; pointer-events: none; transition: opacity .3s; }
+.lock-ui { position: absolute; z-index: 8; left: 50%; bottom: calc(var(--dash-top) + 8px); translate: -50% 0; width: min(560px, calc(100vw - 24px)); display: grid; justify-items: center; gap: 8px; padding: 10px 14px; border-radius: 20px; background: #0a1230e6; border: 2px solid #7fe7ffaa; box-shadow: 0 0 24px #4fd8ff33; backdrop-filter: blur(6px); animation: panel-up .4s .3s both; }
+.lock-read { margin: 0; display: flex; align-items: center; gap: 8px; }
+.lr-label { font: 700 10px var(--font); letter-spacing: .2em; color: var(--cyan); }
+.lr-letter { min-width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; background: #f4f6fb; color: #111; font: 900 24px/1 var(--display); box-shadow: inset 0 -3px #9aa4b2; }
+.lr-letter.blank { color: #b49a2a; }
+.slots { display: flex; gap: 4px; }
+.slot { width: clamp(18px, 3.4vw, 30px); height: clamp(24px, 4.4vw, 38px); display: grid; place-items: center; border-radius: 6px; background: #141a36; border: 2px solid #3e5d8a; color: #fff; font: 900 clamp(13px, 2.4vw, 20px)/1 var(--display); }
+.slot.filled { background: #f4f6fb; color: #111; border-color: #f4f6fb; }
+.slot.space { background: #2a3150; border-color: #2a3150; }
+.slot.next { border-color: var(--yellow); box-shadow: 0 0 8px #ffd34588; }
+.lock-ui.wrong .slot.filled { background: #ff5f7e; border-color: #ff5f7e; }
+.lock-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.lb { padding: 8px 14px; border-radius: 14px; background: #253b69; border: 2px solid #88bff2; font: 700 13px var(--font); transition: background .15s, transform .1s; }
+.lb:hover { background: #31508c; }
+.lb:active { transform: translateY(2px); }
+.lb.turn { width: 48px; font-size: 22px; padding: 2px 0; }
+.lb.push-btn { background: linear-gradient(#88f86f, #2caf38); color: #073915; border-color: #c9ffb8; padding: 8px 20px; }
+.lb.pull { background: #ffd345; color: #2a1d00; border-color: #fff0b0; }
+.lock-btns.small .lb { padding: 6px 11px; font-size: 12px; }
+.lock-ui .lock-msg { margin: 0; min-height: 1.3em; font-size: 13px; }
+@keyframes lock-idle { 0%, 100% { rotate: -4deg; } 50% { rotate: 4deg; } }
+@keyframes push-in { 40% { transform: scale(.86); } }
+@keyframes tick { 50% { transform: translateY(2px); } }
+@keyframes lock-pop { to { opacity: 0; translate: -50% -140%; rotate: -20deg; } }
 @keyframes moon-shake { 0%, 100% { translate: 0 0; } 20% { translate: -6px 2px; } 40% { translate: 5px -3px; } 60% { translate: -4px 3px; } 80% { translate: 3px -2px; } }
-
-/* the padlock dialog */
-.lock-hint { margin: 0 0 22px; color: #cfe0ef; }
-.padlock { --dial: clamp(20px, 5.2vw, 40px); position: relative; width: max-content; max-width: 100%; margin: 54px auto 0; }
-.shackle { position: absolute; left: 22%; right: 22%; bottom: 82%; height: 74px; border: 16px solid #c3cfdf; border-bottom: 0; border-radius: 120px 120px 0 0; background: none; box-shadow: inset 0 4px 0 #ffffff88, 0 -2px 0 #6c7a8f; transition: transform .45s cubic-bezier(.3, 1.6, .5, 1); z-index: 0; }
-.padlock.open .shackle { transform: translateY(-30px); }
-.lock-body { position: relative; z-index: 1; padding: 26px 18px 18px; border-radius: 22px; background: linear-gradient(160deg, #4a5a74, #26324a 55%, #1a2236); border: 4px solid #8fa2bf; box-shadow: inset 0 2px 0 #ffffff55, inset 0 -6px 12px #0008, 0 14px 30px #000a; }
-.lock-brand { position: absolute; left: 50%; top: 6px; translate: -50% 0; font: 800 11px var(--font); letter-spacing: .3em; color: #b8c7dc; }
-.dials { display: flex; gap: 4px; padding: 8px; border-radius: 12px; background: #0d1322; box-shadow: inset 0 3px 8px #000; }
-.dial { display: flex; flex-direction: column; align-items: center; width: var(--dial); }
-.dial-btn { width: 100%; height: 18px; font-size: 9px; color: #8fa2bf; border-radius: 4px; }
-.dial-btn:hover { color: var(--yellow); background: #ffffff10; }
-.dial-face { width: 100%; height: calc(var(--dial) * 1.35); padding: 0; border: 0; border-radius: 6px; text-align: center; font: 900 calc(var(--dial) * .7)/1 var(--display); color: #1a1a2a; caret-color: transparent; cursor: ns-resize; touch-action: none;
-  background: linear-gradient(#8a93a6, #f4f6fb 28%, #ffffff 50%, #f4f6fb 72%, #8a93a6); box-shadow: inset 0 0 0 1px #0006; }
-.dial-face:focus { outline: 2px solid var(--yellow); outline-offset: 1px; }
-.dial.blank .dial-face { color: transparent; background: linear-gradient(#8a93a6, #dfe4ee 28%, #eef1f7 50%, #dfe4ee 72%, #8a93a6); }
-.dial.spin-down .dial-face { animation: dial-down .18s ease-out; }
-.dial.spin-up .dial-face { animation: dial-up .18s ease-out; }
-.keyhole { display: block; width: 14px; height: 22px; margin: 12px auto 0; border-radius: 7px 7px 3px 3px; background: radial-gradient(circle at 50% 30%, #05070d 5px, transparent 6px), linear-gradient(#05070d, #05070d) 50% 100% / 5px 12px no-repeat; }
-.padlock.nope { animation: moon-shake .45s linear; }
-.lock-actions { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
-.lock-msg { min-height: 1.5em; margin: 10px 0 0; text-align: center; font-weight: 700; color: var(--yellow); }
-@keyframes dial-down { from { transform: translateY(-40%); opacity: .3; } }
-@keyframes dial-up { from { transform: translateY(40%); opacity: .3; } }
 
 /* ---------- Contact form ---------- */
 .contact { display: grid; gap: 14px; }
@@ -656,7 +683,4 @@ body.traveling .city-heading, body.traveling #edgeArrows, body.traveling .world-
   .jb-card-inner { padding: 6px 10px 8px; }
   .jb-by { font-size: 12px; } .jb-date { font-size: 11px; }
   .jb-cabinet { border-radius: 40% 40% 18px 18px / 20% 20% 18px 18px; }
-  .lock-body { padding: 24px 8px 14px; }
-  .dials { gap: 2px; padding: 5px; }
-  .shackle { height: 54px; border-width: 12px; }
 }

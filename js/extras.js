@@ -101,10 +101,46 @@ Extras.billboard = board => {
 };
 
 /* ==========================================================================
-   MUMBO'S MOON — letter lock in the crater; the right words crack it open
+   MUMBO'S MOON — a locker-style combination dial sitting in the crater.
+   Turn the dial to a letter, push it in to lock that letter into the next
+   slot, then pull the shackle. MUMBO JUMBO (rest blank) cracks the moon open.
    ========================================================================== */
-const LETTERS = ['', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+const DIAL = [' ', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];   // position 0 is the blank
+const STEP = 360 / DIAL.length;
 let moonOpen = false;   // re-locks on every visit
+
+function lockSVG() {
+  const marks = DIAL.map((l, i) => {
+    const a = i * STEP;
+    return `<g transform="rotate(${a} 100 160)">
+      <line x1="100" y1="${160 - 80}" x2="100" y2="${160 - 73}" class="tick"/>
+      ${l === ' ' ? '<circle cx="100" cy="91" r="3.2" class="dot"/>' : `<text x="100" y="95.5" class="ltr">${l}</text>`}
+    </g>`;
+  }).join('');
+  return `<svg viewBox="0 0 200 260" class="lock-svg" aria-hidden="true">
+    <defs>
+      <linearGradient id="steel" x1="0" x2="1"><stop offset="0" stop-color="#7e8a99"/><stop offset=".35" stop-color="#f2f6fb"/><stop offset=".6" stop-color="#b9c3cf"/><stop offset="1" stop-color="#6b7684"/></linearGradient>
+      <radialGradient id="bezel" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#b8c2ce"/><stop offset="1" stop-color="#5c6773"/></radialGradient>
+      <radialGradient id="face" cx=".45" cy=".4" r=".75"><stop offset="0" stop-color="#2b2f38"/><stop offset="1" stop-color="#07080b"/></radialGradient>
+      <radialGradient id="knob" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#aeb8c4"/><stop offset="1" stop-color="#4f5965"/></radialGradient>
+    </defs>
+    <g class="shackle"><path d="M58 120 V62 a42 42 0 0 1 84 0 V120" fill="none" stroke="url(#steel)" stroke-width="17" stroke-linecap="round"/></g>
+    <circle cx="100" cy="160" r="94" fill="url(#bezel)" stroke="#3d4650" stroke-width="2"/>
+    <circle cx="100" cy="160" r="85" fill="#0d0f14"/>
+    <g class="dial-ring">
+      <circle cx="100" cy="160" r="82" fill="url(#face)"/>
+      ${marks}
+      <text x="100" y="134" class="brand">MUMBO</text>
+      <text x="100" y="196" class="brand small">MOON CO.</text>
+    </g>
+    <path d="M100 74 l-7 -10 h14 z" class="marker"/>
+    <g class="push">
+      <circle cx="100" cy="160" r="30" fill="url(#knob)" stroke="#3d4650" stroke-width="2"/>
+      <circle cx="100" cy="160" r="23" fill="none" stroke="#ffffff66"/>
+      <text x="100" y="157" class="push-t">PUSH</text><text x="100" y="170" class="push-s">LOCK IN</text>
+    </g>
+  </svg>`;
+}
 
 Extras.moon = (scene, board) => {
   // a second copy of the art becomes the lid that lifts off
@@ -122,77 +158,139 @@ Extras.moon = (scene, board) => {
     else openDialog('Secret stash', '<p class="eyebrow">You cracked the moon!</p><p>The secret folder is still being packed. Check back soon for the goods.</p>');
   });
   board.append(folder);
-  if (moonOpen) board.classList.add('cracked', 'instant');
-};
+  if (moonOpen) { board.classList.add('cracked', 'instant'); return; }
 
-function lockIsRight(values) {
-  return values.map(v => v || ' ').join('').trim().replace(/\s+/g, ' ') === MOON_CODE;
-}
-
-Extras.openLock = () => {
-  if (moonOpen) { $('.world[data-place=about] .secret-folder')?.click(); return; }
-  const values = Array(MOON_SLOTS).fill('');
-  openDialog('The moon lock', `
-    <p class="lock-hint">Spin the letters to spell the secret words. Leave the rest blank.</p>
-    <div class="padlock">
-      <span class="shackle" aria-hidden="true"></span>
-      <div class="lock-body">
-        <span class="lock-brand" aria-hidden="true">MUMBO&nbsp;CO.</span>
-        <div class="dials" role="group" aria-label="Letter dials">${values.map((_, i) => `
-          <div class="dial" data-i="${i}">
-            <button class="dial-btn up" tabindex="-1" aria-label="Previous letter">▲</button>
-            <input class="dial-face" maxlength="1" inputmode="text" autocomplete="off" autocapitalize="characters" aria-label="Letter ${i + 1}" value="">
-            <button class="dial-btn down" tabindex="-1" aria-label="Next letter">▼</button>
-          </div>`).join('')}
-        </div>
-        <span class="keyhole" aria-hidden="true"></span>
-      </div>
+  /* ---------- the lock in the crater ---------- */
+  const lock = document.createElement('div');
+  lock.className = 'crater-lock';
+  lock.innerHTML = `${lockSVG()}<button class="lock-wake" aria-label="Zoom in on the locked crater"></button>
+    <span class="dial-hit" role="slider" tabindex="-1" aria-label="Letter dial" aria-valuemin="0" aria-valuemax="26"></span>
+    <button class="push-hit" tabindex="-1" aria-label="Push to lock in the letter"></button>
+    <button class="shackle-hit" tabindex="-1" aria-label="Pull the shackle to open"></button>
+    <span class="crater-tip">Locked…</span>`;
+  board.append(lock);
+  const ui = document.createElement('div');
+  ui.className = 'lock-ui'; ui.hidden = true;
+  ui.innerHTML = `
+    <p class="lock-read"><span class="lr-label">DIAL</span><b class="lr-letter">·</b></p>
+    <div class="slots" aria-label="Locked-in letters">${Array.from({ length: MOON_SLOTS }, (_, i) => `<span class="slot" data-i="${i}"></span>`).join('')}</div>
+    <div class="lock-btns">
+      <button class="lb turn" data-turn="-1" aria-label="Turn left">⟲</button>
+      <button class="lb push-btn">Push · lock in</button>
+      <button class="lb turn" data-turn="1" aria-label="Turn right">⟳</button>
     </div>
-    <div class="lock-actions"><button class="btn lock-try">Pull the lock</button><button class="btn lock-clear">Clear</button></div>
-    <p class="lock-msg" aria-live="polite"></p>`);
-  const root = $('#directoryBody'), faces = $$('.dial-face', root), padlock = $('.padlock', root), msg = $('.lock-msg', root);
-  const set = (i, v) => { values[i] = v; faces[i].value = v; faces[i].parentElement.classList.toggle('blank', !v); };
-  const spin = (i, d) => {
-    const at = LETTERS.indexOf(values[i]);
-    set(i, LETTERS[(at + d + LETTERS.length) % LETTERS.length]);
-    const dial = faces[i].parentElement; dial.classList.remove('spin-up', 'spin-down'); void dial.offsetWidth; dial.classList.add(d > 0 ? 'spin-down' : 'spin-up');
+    <div class="lock-btns small">
+      <button class="lb undo">Undo</button><button class="lb clear">Clear</button><button class="lb pull">Pull to open</button><button class="lb exit">Back</button>
+    </div>
+    <p class="lock-msg" aria-live="polite">Turn the dial, push to lock in each letter.</p>`;
+  scene.append(ui);
+
+  const ring = $('.dial-ring', lock), hit = $('.dial-hit', lock), msg = $('.lock-msg', ui), readout = $('.lr-letter', ui);
+  let angle = 0, entered = [], zoomed = false;
+  const index = () => ((Math.round(-angle / STEP) % DIAL.length) + DIAL.length) % DIAL.length;
+  const show = (snap = false) => {
+    ring.style.transition = snap ? 'transform .18s ease-out' : 'none';
+    ring.style.transform = `rotate(${angle}deg)`;
+    const l = DIAL[index()];
+    readout.textContent = l === ' ' ? '·' : l;
+    readout.classList.toggle('blank', l === ' ');
+    hit.setAttribute('aria-valuenow', index()); hit.setAttribute('aria-valuetext', l === ' ' ? 'blank' : l);
   };
-  values.forEach((_, i) => set(i, ''));
-  $$('.dial', root).forEach((dial, i) => {
-    $('.up', dial).addEventListener('click', () => spin(i, -1));
-    $('.down', dial).addEventListener('click', () => spin(i, 1));
-    dial.addEventListener('wheel', e => { e.preventDefault(); spin(i, Math.sign(e.deltaY)); }, { passive: false });
-    let y0 = null;
-    dial.addEventListener('pointerdown', e => { if (e.target.closest('.dial-btn')) return; y0 = e.clientY; });
-    dial.addEventListener('pointermove', e => { if (y0 === null) return; const dy = e.clientY - y0; if (Math.abs(dy) > 18) { spin(i, dy > 0 ? -1 : 1); y0 = e.clientY; } });
-    dial.addEventListener('pointerup', () => y0 = null); dial.addEventListener('pointercancel', () => y0 = null);
+  const turn = d => { angle = Math.round(angle / STEP) * STEP + d * STEP; show(true); click(); };   // +1 = clockwise
+  const click = () => { lock.classList.remove('tick'); void lock.offsetWidth; lock.classList.add('tick'); };
+  const paint = () => $$('.slot', ui).forEach((sl, i) => {
+    const v = entered[i];
+    sl.textContent = v && v !== ' ' ? v : '';
+    sl.classList.toggle('filled', v !== undefined);
+    sl.classList.toggle('space', v === ' ');
+    sl.classList.toggle('next', i === entered.length);
   });
-  faces.forEach((f, i) => {
-    f.addEventListener('keydown', e => {
-      if (/^[a-z]$/i.test(e.key)) { e.preventDefault(); set(i, e.key.toUpperCase()); faces[i + 1]?.focus(); }
-      else if (e.key === ' ') { e.preventDefault(); set(i, ''); faces[i + 1]?.focus(); }
-      else if (e.key === 'Backspace') { e.preventDefault(); if (values[i]) set(i, ''); else { faces[i - 1]?.focus(); if (i) set(i - 1, ''); } }
-      else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); spin(i, e.key === 'ArrowUp' ? -1 : 1); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); faces[i - 1]?.focus(); }
-      else if (e.key === 'ArrowRight') { e.preventDefault(); faces[i + 1]?.focus(); }
-      else if (e.key === 'Enter') { e.preventDefault(); attempt(); }
-    });
-    f.addEventListener('input', () => { const v = f.value.replace(/[^a-z]/gi, '').slice(-1).toUpperCase(); set(i, v); if (v) faces[i + 1]?.focus(); });
-    f.addEventListener('focus', () => f.select());
-  });
-  function attempt() {
-    if (lockIsRight(values)) {
-      padlock.classList.add('open'); msg.textContent = 'Click… it’s open!';
+  function push() {
+    if (entered.length >= MOON_SLOTS) { msg.textContent = 'All slots are full. Pull to open, or undo.'; return; }
+    entered.push(DIAL[index()]);
+    lock.classList.remove('pushed'); void lock.offsetWidth; lock.classList.add('pushed');
+    paint();
+    const l = DIAL[index()];
+    msg.textContent = l === ' ' ? 'Blank locked in.' : `${l} locked in.`;
+  }
+  function pull() {
+    const word = entered.join('').trim().replace(/\s+/g, ' ');
+    if (word === MOON_CODE) {
+      lock.classList.add('open'); msg.textContent = 'Click… it’s open!';
       moonOpen = true;
-      setTimeout(() => { closeDialog(); crackMoon(); }, App.paused ? 200 : 1100);
+      setTimeout(() => { exit(); setTimeout(() => { lock.remove(); ui.remove(); crackMoon(); }, App.paused ? 0 : 650); }, App.paused ? 100 : 900);
     } else {
-      msg.textContent = values.some(Boolean) ? 'Nope — the moon stays shut.' : 'Spin some letters first.';
-      padlock.classList.remove('nope'); void padlock.offsetWidth; padlock.classList.add('nope');
+      msg.textContent = entered.length ? 'Nope, the moon stays shut. Try again.' : 'Lock in some letters first.';
+      lock.classList.remove('nope'); void lock.offsetWidth; lock.classList.add('nope');
+      if (entered.length) { ui.classList.add('wrong'); setTimeout(() => { ui.classList.remove('wrong'); entered = []; paint(); }, 700); }
     }
   }
-  $('.lock-try', root).addEventListener('click', attempt);
-  $('.lock-clear', root).addEventListener('click', () => { values.forEach((_, i) => set(i, '')); msg.textContent = ''; faces[0].focus(); });
-  faces[0].focus();
+
+  /* zoom the camera into the crater so the dial is big enough to use */
+  function enter() {
+    if (zoomed || App.busy) return;
+    zoomed = true;
+    document.body.classList.add('lock-mode');
+    ui.hidden = false;
+    const r = board.getBoundingClientRect(), dashTop = $('#reel').getBoundingClientRect().top;
+    const sr = scene.getBoundingClientRect(), uiTop = sr.top + ui.offsetTop, top = $('.hud').getBoundingClientRect().bottom + 8, bottom = Math.min(dashTop, uiTop) - 14;
+    const avail = Math.max(120, bottom - top);
+    const lockW = Math.min(340, innerWidth * 0.8, avail / 1.3);
+    const s = lockW / (0.15 * r.width);
+    const px = 0.69 * r.width, py = 0.547 * r.height + (0.5 - 0.615) * 0.15 * r.width * 1.3;
+    const tx = innerWidth / 2 - r.left - px * s, ty = top + avail / 2 - r.top - py * s;
+    board.style.transformOrigin = '0 0';
+    board.style.transition = App.paused ? 'none' : 'transform .8s cubic-bezier(.3,.8,.3,1)';
+    board.style.transform = `translate(${tx}px,${ty}px) scale(${s})`;
+    paint(); show();
+    setTimeout(() => hit.focus({ preventScroll: true }), 50);
+  }
+  function exit() {
+    if (!zoomed) return;
+    zoomed = false;
+    document.body.classList.remove('lock-mode');
+    ui.hidden = true;
+    board.style.transform = '';
+    setTimeout(() => { if (!zoomed) { board.style.transition = ''; board.style.transformOrigin = ''; } }, 850);
+  }
+  Extras.exitLock = exit;
+
+  $('.lock-wake', lock).addEventListener('click', enter);
+  lock.addEventListener('pointerenter', () => { if (!zoomed) App.emit('inspect', { name: 'Locked crater', kind: 'Something is hidden in the moon…' }); });
+  lock.addEventListener('pointerleave', () => { if (!zoomed) App.emit('inspect', null); });
+  $('.push-hit', lock).addEventListener('click', push);
+  $('.shackle-hit', lock).addEventListener('click', pull);
+  $('.push-btn', ui).addEventListener('click', push);
+  $('.pull', ui).addEventListener('click', pull);
+  $('.undo', ui).addEventListener('click', () => { entered.pop(); paint(); msg.textContent = 'Undone.'; });
+  $('.clear', ui).addEventListener('click', () => { entered = []; paint(); msg.textContent = 'Cleared.'; });
+  $('.exit', ui).addEventListener('click', exit);
+  $$('[data-turn]', ui).forEach(b => b.addEventListener('click', () => turn(+b.dataset.turn)));
+
+  // drag the dial round like a real locker lock
+  let drag = null;
+  const ang = e => { const r = $('.dial-ring', lock).getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; };
+  hit.addEventListener('pointerdown', e => { if (!zoomed) return; e.preventDefault(); drag = { a: ang(e), start: angle, last: index() }; hit.setPointerCapture(e.pointerId); });
+  hit.addEventListener('pointermove', e => {
+    if (!drag) return;
+    let d = ang(e) - drag.a; if (d > 180) d -= 360; if (d < -180) d += 360;
+    angle = drag.start + d; drag.a = ang(e); drag.start = angle; show();
+    if (index() !== drag.last) { drag.last = index(); click(); }
+  });
+  const endDrag = () => { if (!drag) return; drag = null; angle = Math.round(angle / STEP) * STEP; show(true); };
+  hit.addEventListener('pointerup', endDrag); hit.addEventListener('pointercancel', endDrag);
+  lock.addEventListener('wheel', e => { if (!zoomed) return; e.preventDefault(); e.stopPropagation(); turn(Math.sign(e.deltaY)); }, { passive: false });
+  lock.addEventListener('keydown', e => {
+    if (!zoomed) return;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); turn(-1); }
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); turn(1); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); push(); }
+    else if (e.key === 'Backspace') { e.preventDefault(); entered.pop(); paint(); }
+  });
+  hit.tabIndex = 0;
+  App.on('travel-start', exit);
+  addEventListener('resize', () => { if (zoomed) { exit(); } });
+  show();
 };
 
 function crackMoon() {

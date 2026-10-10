@@ -60,6 +60,15 @@ The structure follows your brief: bucket-hat galaxy → wormhole → universe ma
   - Paste your Dropbox link into `SECRET_FOLDER_URL` in `js/data.js`. Until then the folder says it's still being packed.
   - It re-locks every visit. Anyone who reads the page code can find the answer, so keep anything private password-protected on Dropbox itself.
 
+## Round 3 changes
+- **World map:** the worlds are about 30% bigger. The map now uses the space down to the dashboard, the moon orbits up and down between the left and right worlds, and the four worlds don't overlap.
+- **Moon lock:** a locker-style combination dial now sits right in the crater, with letters instead of numbers.
+  - Click it and the camera zooms into the crater.
+  - Turn the dial by dragging it in a circle, scrolling, using the arrow keys, or pressing the ⟲ ⟳ buttons. The red marker at the top shows the current letter. The yellow dot is the blank.
+  - **Push** (the centre knob, the green button, or Enter) locks in that letter and moves on to the next open slot.
+  - Pull the shackle (or press "Pull to open"). MUMBO JUMBO with the rest left blank cracks the moon open. A wrong code flashes red and clears.
+  - Undo, Clear and Back (or Esc) are there too.
+
 ## Behaviour I changed (round 1) (please check)
 
 1. **Blimp message.** The 10/2 Hurtbox show has passed, so the blimp now reads "New shows landing soon ★ Bookings: mumbobeatz@gmail.com" with a "NEW SHOWS SOON" flyer. Shows now live in one list in `js/data.js` with real dates. Add a show there and it appears on the blimp, in Event Central and in INFO, then moves to the archive by itself after the date.

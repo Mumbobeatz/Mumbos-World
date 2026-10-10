@@ -185,7 +185,6 @@ const WORLDS = {
     title: 'Mumbo’s Moon', kicker: 'The man in the hat', art: 'moon', ratio: 548 / 653, panel: true,
     info: 'Meet Mumbo and explore the man behind the bucket hat.',
     stops: [
-      { name: 'Locked crater', kind: 'Something is hidden in the moon…', description: '', x: 69, y: 54.7, w: 17, h: 14, lock: true },
       { name: 'The Little Ship', kind: 'Mumbo’s ride', description: 'Every universe needs a getaway car. Bookings and hellos go through here.', x: 33, y: 24, w: 30, h: 16, url: LINKS.email, label: 'Email for bookings' }
     ],
     guide: () => `
