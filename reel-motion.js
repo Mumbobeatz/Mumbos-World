@@ -1,1 +1,0 @@
-/* GPS motion is managed by dashboard.js so each input has one controller. */
