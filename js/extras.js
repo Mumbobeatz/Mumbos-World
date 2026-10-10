@@ -33,11 +33,10 @@ Extras.jukebox = scene => {
       </div>
       <div class="rk-panel">
         <div class="rk-now" aria-live="polite"></div>
+        <div class="jb-links"></div>
         <button class="rk-play" aria-label="Play"><span class="jb-play-icon" aria-hidden="true"></span></button>
       </div>
-      <p class="rk-badge">MUMBO-OLA</p>
-      <div class="jb-links"></div>
-      <div class="rk-grille" aria-hidden="true"></div>
+      <div class="rk-grille" aria-hidden="true"><p class="rk-badge">MUMBO-OLA</p></div>
     </div>`;
   $('.board-area', scene).append(box);
 
@@ -45,7 +44,7 @@ Extras.jukebox = scene => {
   let at = 0, spread = -1, playing = false, audio = null;
   const n = SINGLES.length, wrap = i => (i + n) % n;
   const code = i => `${String.fromCharCode(65 + Math.floor(i / 2) % 26)}${i % 2 + 1}`;
-  const strip = i => { const s = SINGLES[i]; return `<button class="title-strip" data-i="${i}" style="--c:${s.color}"><span class="ts-code">${code(i)}</span><b>${esc(s.title)}</b><small>${esc(s.artists)}</small></button>`; };
+  const strip = i => { const s = SINGLES[i]; return `<button class="title-strip" data-i="${i}" style="--c:${s.color}"><span class="ts-code">${code(i)}</span><span class="ts-text"><b>${esc(s.title)}</b><small>${esc(s.artists)}</small></span></button>`; };
 
   /* ---- the title-page book: double-sided leaves hinged on a centre spine ---- */
   const nPages = Math.ceil(n / PER_PAGE), nSpreads = Math.ceil(nPages / 2);
@@ -68,7 +67,7 @@ Extras.jukebox = scene => {
     pages[1].innerHTML = sideOf(dir > 0 ? to : from, true);
     const leaf = document.createElement('div');
     leaf.className = 'leaf ' + (dir > 0 ? 'fwd' : 'back');
-    leaf.innerHTML = `<div class="face front">${sideOf(dir > 0 ? from : to, true)}</div><div class="face rear">${sideOf(dir > 0 ? to : from, false)}</div>`;
+    leaf.innerHTML = `<div class="lf front">${sideOf(dir > 0 ? from : to, true)}</div><div class="lf rear">${sideOf(dir > 0 ? to : from, false)}</div>`;
     leaf.style.setProperty('--dur', dur + 'ms');
     book.append(leaf);
     mark();
