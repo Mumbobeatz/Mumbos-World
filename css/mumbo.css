@@ -622,7 +622,9 @@ body.traveling .city-heading, body.traveling #edgeArrows, body.traveling .world-
 .crater-lock .push { filter: drop-shadow(-1px 2px 2px #000a); }
 .lock-svg .dot { fill: #ffd345; }
 .lock-svg .ltr { fill: #dcd8f5; font: 800 12.5px var(--display); text-anchor: middle; transition: fill .15s; }
-.lock-svg .ltr.lit { fill: #ffd345; filter: drop-shadow(0 0 3px #ffd345); }
+.lt-hit { fill: transparent; pointer-events: all; }
+.lock-svg .lt.lit .ltr { fill: #ffd345; filter: drop-shadow(0 0 3px #ffd345); }
+.lock-svg .ltr { pointer-events: none; }
 .lock-svg .dot.lit { fill: #fff3b0; filter: drop-shadow(0 0 3px #ffd345); }
 .lock-svg .grip { stroke: #2a2356; stroke-width: 2; }
 .lock-svg .pointer { fill: #ff5f7e; stroke: #3d0b16; stroke-width: 1; }
@@ -650,11 +652,20 @@ body.lock-mode .world[data-place=about] .board-area { overflow: visible; }
 body.lock-mode .moon-panel, body.lock-mode .city-heading, body.lock-mode #edgeArrows, body.lock-mode .flyby { opacity: 0; pointer-events: none; transition: opacity .3s; }
 .lock-ui { position: absolute; z-index: 8; left: 50%; bottom: calc(var(--dash-top) + 8px); translate: -50% 0; width: min(560px, calc(100vw - 24px)); display: grid; justify-items: center; gap: 8px; padding: 10px 14px; border-radius: 20px; background: #0a1230e6; border: 2px solid #7fe7ffaa; box-shadow: 0 0 24px #4fd8ff33; backdrop-filter: blur(6px); animation: panel-up .4s .3s both; }
 .lock-orbit { position: fixed; inset: 0; z-index: 9; pointer-events: none; }
+.lock-orbit .slot.filled { pointer-events: auto; cursor: pointer; }
+.lock-orbit .slot.filled:hover { outline: 2px solid var(--yellow); }
+.lock-orbit.wrong { animation: moon-shake .5s linear; }
+.lock-back { position: absolute; z-index: 10; left: 50%; bottom: calc(var(--dash-top) + 10px); translate: -50% 0; padding: 9px 18px; border-radius: 999px; background: #0a1230e6; border: 2px solid #7fe7ffaa; color: #fff; font: 700 14px var(--font); backdrop-filter: blur(6px); }
+.lock-back:hover { border-color: var(--yellow); }
+body.lock-mode .lock-svg .lt { cursor: pointer; }
+body.lock-mode .lock-svg .lt:hover .ltr { fill: #fff; }
+.crater-lock .lock-svg { pointer-events: none; }
+body.lock-mode .crater-lock .lock-svg .letters { pointer-events: auto; }
 .slot { position: absolute; translate: -50% -50%; width: clamp(24px, 3vw, 32px); height: clamp(28px, 3.6vw, 38px); display: grid; place-items: center; animation: slot-in .4s var(--d, 0s) both cubic-bezier(.3, 1.5, .5, 1); box-shadow: 0 3px 8px #000a; border-radius: 6px; background: #141a36; border: 2px solid #3e5d8a; color: #fff; font: 900 clamp(13px, 2.4vw, 20px)/1 var(--display); }
 .slot.filled { background: #f4f6fb; color: #111; border-color: #f4f6fb; }
 .slot.space { background: #2a3150; border-color: #2a3150; }
 .slot.next { border-color: var(--yellow); box-shadow: 0 0 8px #ffd34588; }
-.lock-orbit.wrong .slot.filled { background: #ff5f7e; border-color: #ff5f7e; }
+.lock-orbit.wrong .slot.filled { background: #ff3b5c; border-color: #ff3b5c; color: #fff; box-shadow: 0 0 14px #ff3b5c; }
 .lock-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .lb { padding: 8px 14px; border-radius: 14px; background: #253b69; border: 2px solid #88bff2; font: 700 13px var(--font); transition: background .15s, transform .1s; }
 .lb:hover { background: #31508c; }
