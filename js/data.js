@@ -46,6 +46,37 @@ const SHOWS = [
   }
 ];
 
+/* ---------- contact form ----------
+   Paste the form endpoint from Formspree (or a similar service) here, e.g.
+   'https://formspree.io/f/abcdwxyz'. Until it is set, the form opens the
+   visitor's email app with everything pre-filled instead. */
+const CONTACT_ENDPOINT = '';
+const CONTACT_REASONS = [
+  { id: 'booking', label: 'Booking', subs: ['DJ gig', 'Special event'] },
+  { id: 'hi', label: 'Say hi', hint: 'Send a message to Mumbo!' }
+];
+
+/* ---------- Mumbo's Moon secret lock ----------
+   The answer and the folder link are visible to anyone who reads the page
+   code, so keep this playful — nothing private belongs behind it. */
+const MOON_CODE = 'MUMBO JUMBO';
+const MOON_SLOTS = 13;
+const SECRET_FOLDER_URL = '';   // paste the Dropbox link here when it's ready
+
+/* ---------- Silly Singles jukebox ----------
+   Placeholder discs: add real release dates and links as they come in.
+   Leave a link empty ('') to fall back to the MUMBO artist page. */
+const SINGLES = [
+  { title: 'Feelin’ Pretty Suavé', artists: 'MUMBO', date: '', audio: '', soundcloud: '', spotify: '', apple: '', color: '#ff7ad9' },
+  { title: 'Missed Call', artists: 'MUMBO', date: '', soundcloud: '', spotify: '', apple: '', color: '#6fe3ff' },
+  { title: 'Do It', artists: 'MUMBO & Scum Wubz', date: '', soundcloud: '', spotify: '', apple: '', color: '#ffd345' },
+  { title: 'Party Fix', artists: 'MUMBO', date: '', soundcloud: '', spotify: '', apple: '', color: '#9b7bff' },
+  { title: 'Satellite (Mumbo Flip)', artists: 'MUMBO', date: '', soundcloud: '', spotify: '', apple: '', color: '#57e8bc' },
+  { title: 'Eat the Bass (Mumbo Flip)', artists: 'MUMBO', date: '', soundcloud: '', spotify: '', apple: '', color: '#ff9a4d' },
+  { title: 'Project Seismic', artists: 'MUMBO', date: '', soundcloud: '', spotify: '', apple: '', color: '#ff5f7e' },
+  { title: 'My Name Is I Like to Party 3', artists: 'MUMBO', date: '', soundcloud: '', spotify: '', apple: '', color: '#b6f36b' }
+];
+
 const ARCHIVE = [
   { tag: 'Festival memories', title: 'Dancefestopia', text: 'Back in the world of bass.', url: LINKS.instagram, label: 'Photos & posts' },
   { tag: 'Rooftop sessions', title: 'Nova', text: 'House music, open skies, good company.', url: 'https://www.instagram.com/p/Cfc1Padpnps/', label: 'See the post' }
@@ -154,7 +185,7 @@ const WORLDS = {
     title: 'Mumbo’s Moon', kicker: 'The man in the hat', art: 'moon', ratio: 548 / 653, panel: true,
     info: 'Meet Mumbo and explore the man behind the bucket hat.',
     stops: [
-      { name: 'Meet MUMBO', kind: 'Ryan / San Diego', description: 'I’m Ryan, aka MUMBO—a San Diego DJ and producer with a love for heavy bass, funky house, and taking the unexpected turn.', x: 50, y: 58, w: 46, h: 34, url: LINKS.instagram, label: 'Say hi on Instagram', image: 'character' },
+      { name: 'Locked crater', kind: 'Something is hidden in the moon…', description: '', x: 69, y: 54.7, w: 17, h: 14, lock: true },
       { name: 'The Little Ship', kind: 'Mumbo’s ride', description: 'Every universe needs a getaway car. Bookings and hellos go through here.', x: 33, y: 24, w: 30, h: 16, url: LINKS.email, label: 'Email for bookings' }
     ],
     guide: () => `
@@ -172,10 +203,14 @@ const WORLDS = {
   events: {
     title: 'Event Central', kicker: 'The live district', art: 'event-central-cutout-v3', ratio: 16 / 9,
     info: 'Past and future Mumbo events.',
+    billboard: true,
     stops: () => {
-      const show = spotlightShow() || pastShows()[0];
+      const next = spotlightShow(), last = pastShows()[0];
       return [
-        show && { name: spotlightShow() ? `Next: ${show.title}` : `Last show: ${show.title}`, kind: prettyDate(show), description: `${show.venue} · ${show.city} · ${show.time} · ${show.age}. ${show.lineup}`, x: 75, y: 27, w: 29, h: 43, url: show.url, label: show.label, image: show.flyer },
+        next
+          ? { name: `Next show: ${next.title}`, kind: prettyDate(next), description: `${next.venue} · ${next.city} · ${next.time} · ${next.age}. ${next.lineup}`, x: 72, y: 28.5, w: 17.5, h: 42, url: next.url, label: next.label, image: next.flyer }
+          : { name: 'New shows landing soon', kind: 'Show board', description: 'No dates on the board right now — follow along for the next announcement.', x: 72, y: 28.5, w: 17.5, h: 42, news: true },
+        last && { name: `Last show: ${last.title}`, kind: prettyDate(last), description: `${last.venue} · ${last.city} · ${last.time} · ${last.age}. ${last.lineup}`, x: 31.4, y: 28.7, w: 13, h: 39, url: last.url, label: 'Photos & posts', image: last.flyer },
         { name: 'Event Central Stage', kind: 'Upcoming and past shows', description: 'The next stop in Mumbo’s live universe. New dates land here first.', x: 51, y: 48, w: 30, h: 42, url: LINKS.instagram, label: 'Show updates' }
       ].filter(Boolean);
     },
@@ -227,17 +262,14 @@ const SUBWORLDS = {
     ]
   },
   'event-central': {
-    title: 'Event Central', kicker: 'Shows · Music Island', art: 'event-central-cutout-v3', ratio: 16 / 9,
+    title: 'Event Central', kicker: 'Shows · Music Island', art: 'event-central-cutout-v3', ratio: 16 / 9, billboard: true,
     info: 'Upcoming and past shows.',
     stops: () => WORLDS.events.stops()
   },
   'silly-singles': {
-    title: 'Silly Singles', kicker: 'Jukebox · Music Island', art: 'music-cutout-v3', ratio: 1, zoom: { scale: 2.25, x: 16, y: 8 },
+    title: 'Silly Singles', kicker: 'Jukebox · Music Island', art: 'music-cutout-v3', ratio: 1, jukebox: true,
     info: 'The jukebox for singles, flips and one-off releases.',
-    notice: 'Interactive jukebox coming soon.',
-    stops: [
-      { name: 'Silly Singles', kind: 'Interactive jukebox · coming soon', description: 'A future jukebox for MUMBO singles with Apple Music, Spotify, SoundCloud and YouTube links.', x: 50, y: 46, w: 50, h: 48, url: LINKS.soundcloud, label: 'Browse SoundCloud' }
-    ]
+    stops: []
   },
   'secret-stuff': {
     title: 'Mumbo’s Secret Stuff', kicker: 'Mix archive · Music Island', art: 'secret-stuff-cutout-v3', ratio: 16 / 9,

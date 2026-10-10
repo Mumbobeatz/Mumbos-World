@@ -47,12 +47,13 @@ function buildWorld(key) {
   const stops = stopsOf(place), spots = $('.spots', scene);
   stops.forEach((stop, i) => {
     const b = document.createElement('button');
-    b.className = 'spot' + (stop.track ? ' track' : '') + (stop.go ? ' gate' : '');
+    b.className = 'spot' + (stop.track ? ' track' : '') + (stop.go ? ' gate' : '') + (stop.lock ? ' lock-spot' : '');
     b.style.cssText = `--x:${stop.x}%;--y:${stop.y}%;--w:${stop.w || 12}%;--h:${stop.h || 10}%;--tilt:${stop.tilt || 0}deg`;
     b.dataset.stop = i;
     b.setAttribute('aria-label', `${stop.name}. ${stop.kind}${stop.go ? '. Fly in' : ''}`);
-    const labelled = !stop.go && key !== 'media' && !sub;
+    const labelled = !stop.go && key !== 'media' && !sub && !stop.lock;
     if (labelled) b.innerHTML = `<span class="tip">${esc(stop.name)}</span>`;
+    if (stop.lock) b.innerHTML = '<span class="mini-lock" aria-hidden="true"><i></i><b>ABC</b></span><span class="tip">Locked…</span>';
     spots.append(b);
   });
   const pick = e => e.target.closest('[data-stop]');
@@ -77,12 +78,15 @@ function buildWorld(key) {
     const panel = $('.moon-panel', scene);
     panel.hidden = false;
     panel.innerHTML = `<p class="eyebrow">Incoming transmission</p><h2>Meet MUMBO</h2>
-      <img class="avatar" src="assets/character.webp" alt="MUMBO character in a fluffy blue jacket and star-covered bucket hat, holding glowing headphones">
+      <span class="avatar"><img src="assets/character.webp" alt="MUMBO character in a fluffy blue jacket and star-covered bucket hat, holding glowing headphones"></span>
       <p>I’m Ryan, aka MUMBO—a San Diego DJ and producer with a love for heavy bass, funky house, and taking the unexpected turn.</p>
       <p>My sets move between sounds, but the goal stays the same: make you move your body and leave with a smile. That playful energy shows up in the music, the cartoons, the characters, and everything you’ll find here.</p>
       <p>Mumbo’s World is where it all comes together. Pick a portal. Get a little lost.</p>
-      <div class="btn-row">${ext(LINKS.instagram, 'Say hi on Instagram')}${ext(LINKS.email, 'Bookings')}</div>`;
+      <div class="btn-row">${ext(LINKS.instagram, 'Instagram')}${ext(LINKS.soundcloud, 'SoundCloud')}${ext(LINKS.tiktok, 'TikTok')}${ext(LINKS.x, 'X')}<button class="btn" data-contact>Bookings ✉</button></div>`;
+    Extras.moon(scene, board);
   }
+  if (place.billboard) Extras.billboard(board);
+  if (place.jukebox) Extras.jukebox(scene);
 
   // life: commuters cross the sky; citizens stroll the streets
   const life = $('.life', scene);
@@ -119,6 +123,8 @@ dialog.addEventListener('close', () => { $('#directoryBody').innerHTML = ''; });
 
 function openStop(stop, origin) {
   if (stop.go) { travel(stop.go, { origin }); return; }
+  if (stop.lock) { Extras.openLock(); return; }
+  if (stop.news) { App.emit('show-news'); return; }
   let actions;
   if (stop.track && !stop.url) actions = chips(STREAMING);
   else if (stop.socials) actions = `<div class="social-grid">${SOCIALS.map(s => `<a href="${s.url}" target="_blank" rel="noopener noreferrer"><strong>${s.name} ↗</strong><span>${s.sub}</span></a>`).join('')}</div>`;
@@ -373,6 +379,7 @@ document.addEventListener('click', e => {
   const go = e.target.closest('[data-go]');
   if (go) { e.preventDefault(); travel(go.dataset.go, { origin: go }); return; }
   if (e.target.closest('[data-directory]')) { closeMenu(); openDirectory(); return; }
+  if (e.target.closest('[data-contact]')) { closeMenu(); Extras.openContact(); return; }
   if (e.target.closest('[data-back]')) { goBack(); return; }
   const edge = e.target.closest('[data-step]');
   if (edge) { step(+edge.dataset.step); return; }

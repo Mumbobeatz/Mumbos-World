@@ -199,6 +199,7 @@
     volume = clamp(Math.round(v), 0, 100);
     knob.style.setProperty('--turn', `${-135 + volume * 2.7}deg`);
     knob.setAttribute('aria-valuenow', volume); out.textContent = volume;
+    $$('#volMeter i').forEach((m, i) => m.classList.toggle('on', volume > i * 20));
     apply(); store.set('volume', volume);
   }
   knob.addEventListener('pointerdown', e => { e.preventDefault(); drag = { y: e.clientY, v: volume }; knob.setPointerCapture(e.pointerId); });

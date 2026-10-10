@@ -22,7 +22,45 @@ The structure follows your brief: bucket-hat galaxy → wormhole → universe ma
 | **Cursor** | The bucket-hat cursor with its glow and soft smoke trail. It now follows you into pop-ups (blimp, INFO, buildings), so it can't disappear any more. |
 | **Blimp** | The propeller spins and the exhaust puffs. On desktop it bounces off the wormhole instead of parking on it. On phones it cruises behind the sign, so the wormhole is always tappable. |
 
-## Behaviour I changed (please check)
+## Round 2 changes (from your notes)
+
+**Landing page and ship**
+- The hat is 5% smaller and sits slightly higher, so its clouds clear the sign and the GPS.
+- New **CONTACT** envelope under Explore (also listed in the Explore menu). It opens a form with:
+  - **Reason:** Booking (DJ gig / Special event) or Say hi
+  - Your name, your email and a subject
+  - A message box
+  - Below the form: mumbobeatz@gmail.com, plus Instagram, TikTok and X (@mumbobeatz)
+  - *Sending is a concept for now.* The form opens the visitor's email app with everything filled in. To make it send by itself, paste a Formspree link into `CONTACT_ENDPOINT` in `js/data.js`. Your phone number is not anywhere in the site.
+- **Dashboard:** the orange dots on the left are now glass lamps set into the painted button rings. The volume knob sits in a recessed plate in the right console (where the painted dots were), with a small level meter.
+- The robot's speech bubble now comes out of the robot.
+- **Wormhole:** no more square around the hat when you dive in. The inward spiral is now a little galaxy, with soft nebula arms and twinkling stars falling into the core.
+
+**World map**
+- The four worlds are now the same size on screen and no longer overlap.
+- Mumbo's Moon is 15% bigger.
+
+**Silly Singles: new jukebox landing page**
+- The discs spin past with ‹ › arrows, or click a disc.
+- A play button sits in the middle.
+- A flip card shows the title, who it's by and the release date.
+- Buttons for SoundCloud, Apple Music and Spotify.
+- The songs are placeholders using your single titles. Fill in dates, links and audio previews in the `SINGLES` list in `js/data.js`. An empty link falls back to your artist page.
+
+**Event Central**
+- The painted billboard now reads "NEW SHOWS LANDING SOON". The Hurtbox poster is stamped **PLAYED 10.2**.
+- Both update from the `SHOWS` list automatically.
+
+**Mumbo's Moon**
+- The About panel now has Instagram, SoundCloud, TikTok and X links, plus a Bookings button that opens the contact form.
+- The stray white mark under Mumbo's leg is cropped out.
+- **The lock:** the old "Meet MUMBO" spot is replaced by a padlock in the right-hand crater. Clicking it opens a 13-letter dial lock.
+  - Spell **MUMBO JUMBO** and leave the rest blank.
+  - The lock clicks open, the moon shakes and splits, and a glowing "CLICK ME" folder pops out.
+  - Paste your Dropbox link into `SECRET_FOLDER_URL` in `js/data.js`. Until then the folder says it's still being packed.
+  - It re-locks every visit. Anyone who reads the page code can find the answer, so keep anything private password-protected on Dropbox itself.
+
+## Behaviour I changed (round 1) (please check)
 
 1. **Blimp message.** The 10/2 Hurtbox show has passed, so the blimp now reads "New shows landing soon ★ Bookings: mumbobeatz@gmail.com" with a "NEW SHOWS SOON" flyer. Shows now live in one list in `js/data.js` with real dates. Add a show there and it appears on the blimp, in Event Central and in INFO, then moves to the archive by itself after the date.
 2. **The INFO screen** starts with "Where to next? Hover a world or building." It updates when you hover a world, a building, or a mini-world spot.

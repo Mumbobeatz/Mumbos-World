@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/mumbo.css?v=v2-1">
+<link rel="stylesheet" href="css/mumbo.css?v=v2-2">
 <link rel="preload" as="image" href="assets/galaxy-v7.webp">
 <link rel="preload" as="image" href="assets/dashboard-fitted.webp">
 </head>
@@ -106,6 +106,7 @@
   <div class="hud-right">
     <button id="motionToggle" aria-pressed="false">Pause motion</button>
     <button id="menuToggle" aria-expanded="false" aria-controls="menu">Explore <span aria-hidden="true">☰</span></button>
+    <button id="contactBtn" data-contact aria-label="Contact Mumbo"><span class="envelope" aria-hidden="true"><i></i></span>CONTACT</button>
   </div>
 </header>
 <nav id="menu" aria-label="Quick navigation" hidden>
@@ -116,6 +117,7 @@
   <button data-go="about">Mumbo’s Moon</button>
   <button data-go="toys">Mumbo’s Playground</button>
   <button data-directory>Browse this world</button>
+  <button data-contact>Contact Mumbo</button>
 </nav>
 
 <!-- SPACESHIP DASHBOARD -->
@@ -146,10 +148,10 @@
     </div>
 
     <div class="volume">
-      <span class="knob" id="knob" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70"></span>
-      <span class="vol-label">VOL <output id="volOut">70</output></span>
+      <span class="knob-well"><span class="knob" id="knob" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70"></span></span>
+      <span class="vol-readout"><span class="vol-label">VOL</span><output id="volOut">70</output><span class="vol-meter" id="volMeter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
     </div>
-    <span class="leds" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="lamp l1" aria-hidden="true"></span><span class="lamp l2" aria-hidden="true"></span><span class="lamp l3" aria-hidden="true"></span>
   </div>
 </section>
 
@@ -163,9 +165,10 @@
 <img id="cursor" src="assets/cursor.webp" alt="" aria-hidden="true">
 <div id="announce" class="sr-only" aria-live="polite"></div>
 
-<script src="js/data.js?v=v2-1"></script>
-<script src="js/fx.js?v=v2-1"></script>
-<script src="js/world.js?v=v2-1"></script>
-<script src="js/cockpit.js?v=v2-1"></script>
+<script src="js/data.js?v=v2-2"></script>
+<script src="js/fx.js?v=v2-2"></script>
+<script src="js/extras.js?v=v2-2"></script>
+<script src="js/world.js?v=v2-2"></script>
+<script src="js/cockpit.js?v=v2-2"></script>
 </body>
 </html>

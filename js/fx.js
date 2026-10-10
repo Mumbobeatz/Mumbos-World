@@ -267,7 +267,11 @@ const CLOUD = loadImage('assets/label-cloud.webp');
     col.rgb=mix(col.rgb,light*hue*1.25,patches*pulse*.30*(1.-smoothstep(.65,1.,light)*.7));
     col.rgb=mix(col.rgb,vec3(.6,.86,1.),exp(-dot(d,d)/.00028)*.9);
     float edge=smoothstep(.0,.10,uv.x)*smoothstep(.0,.10,1.-uv.x)*smoothstep(.0,.08,uv.y)*smoothstep(.0,.08,1.-uv.y);
-    float fade=1.-smoothstep(.52,.74,length((uv-.5)*vec2(1.,1.12)));gl_FragColor=vec4(col.rgb,edge*fade);}`;
+    float fade=1.-smoothstep(.52,.74,length((uv-.5)*vec2(1.,1.12)));float lum=max(col.r,max(col.g,col.b));
+    // key out the dark sky in the artwork so the hat carries its own transparency
+    // (no blend mode needed — no dark box appears while the camera dives in)
+    float key=smoothstep(.05,.32,lum);
+    gl_FragColor=vec4(col.rgb,edge*fade*key);}`;
   const shader = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null; };
   const v = shader(gl.VERTEX_SHADER, vs), f = shader(gl.FRAGMENT_SHADER, fs);
   if (!v || !f) return;
@@ -301,26 +305,49 @@ const CLOUD = loadImage('assets/label-cloud.webp');
   };
 })();
 
-/* Star dust drawn in toward the wormhole: the inward pull. */
+/* The wormhole's own galaxy: two nebula arms and their stars spiral inward
+   and fall into the bright core. Drawn additively so the hat stays white. */
 (() => {
   const c = $('#hatPull'), ctx = c.getContext('2d'), hat = $('#hat');
-  const motes = Array.from({ length: 70 }, () => ({ a: Math.random() * 6.283, r: Math.random(), s: 0.4 + Math.random() * 0.8 }));
+  const sprite = (r, g, b) => {
+    const s = document.createElement('canvas'); s.width = s.height = 64;
+    const x = s.getContext('2d'), grad = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, `rgba(${r},${g},${b},.55)`); grad.addColorStop(.45, `rgba(${r},${g},${b},.18)`); grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+    x.fillStyle = grad; x.fillRect(0, 0, 64, 64); return s;
+  };
+  const clouds = [sprite(176, 150, 255), sprite(150, 205, 255), sprite(225, 170, 255), sprite(190, 235, 255)];
+  const arms = 2, parts = [];
+  for (let i = 0; i < 220; i++) {
+    const star = i % 2 === 0;
+    parts.push({ arm: i % arms, u: Math.random(), jitter: (Math.random() - 0.5) * (star ? 0.5 : 0.35), size: star ? 0.5 + Math.random() * 1.2 : 0.035 + Math.random() * 0.045, star, sprite: clouds[i % clouds.length], speed: 0.05 + Math.random() * 0.04, tw: Math.random() * 6.28 });
+  }
+  let spin = 0, elapsed = 0;
   App.tasks.add((now, dt) => {
     if (App.current !== 'galaxy' && !App.busy) return;
     const w = hat.clientWidth, h = hat.clientHeight;
     if (!w) return;
     if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
     ctx.clearRect(0, 0, w, h);
-    const cx = w * 0.4824, cy = h * 0.3301, rx = w * 0.17, ry = h * 0.15;
-    for (const m of motes) {
-      if (!App.paused) { m.r -= dt * 0.16 * m.s * (1.4 - m.r); m.a += dt * (0.5 + (1 - m.r) * 2.6); }
-      if (m.r <= 0.02) { m.r = 1; m.a = Math.random() * 6.283; }
-      const x = cx + Math.cos(m.a) * rx * m.r, y = cy + Math.sin(m.a) * ry * m.r;
-      ctx.globalAlpha = smooth(clamp((1 - m.r) * 2.2)) * clamp(m.r * 8) * 0.85;
-      ctx.fillStyle = m.s > 0.9 ? '#ffe6fb' : '#dff6ff';
-      ctx.beginPath(); ctx.arc(x, y, 0.6 + m.s * 1.1 * (0.4 + m.r), 0, 6.283); ctx.fill();
+    if (!App.paused) { spin += dt * 0.35; elapsed += dt; }
+    const cx = w * 0.4824, cy = h * 0.3301, rx = w * 0.16, ry = h * 0.135;
+    ctx.globalCompositeOperation = 'lighter';
+    for (const p of parts) {
+      if (!App.paused) { p.u -= dt * p.speed * (0.6 + p.u); if (p.u <= 0.03) { p.u = 1; p.jitter = (Math.random() - 0.5) * 0.4; } }
+      // logarithmic spiral: the closer to the core, the further round the arm
+      const r = p.u, theta = p.arm * Math.PI + spin + Math.log(r) * 2.4 + p.jitter;
+      const x = cx + Math.cos(theta) * rx * r, y = cy + Math.sin(theta) * ry * r;
+      const fade = smooth(clamp((1 - r) * 3)) * smooth(clamp(r * 6));
+      if (p.star) {
+        ctx.globalAlpha = fade * (0.55 + 0.45 * Math.sin(elapsed * 3 + p.tw));
+        ctx.fillStyle = '#f4fbff';
+        ctx.beginPath(); ctx.arc(x, y, p.size * (0.5 + r * 0.8), 0, 6.283); ctx.fill();
+      } else {
+        const size = w * p.size * (0.35 + r);
+        ctx.globalAlpha = fade * 0.32;
+        ctx.drawImage(p.sprite, x - size / 2, y - size / 2, size, size);
+      }
     }
-    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
   });
 })();
 
