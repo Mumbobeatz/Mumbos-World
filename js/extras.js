@@ -13,76 +13,78 @@ const singleDate = s => s.date ? new Date(s.date + 'T12:00:00').toLocaleDateStri
    ========================================================================== */
 Extras.jukebox = scene => {
   scene.classList.add('is-jukebox');
+  const PER_PAGE = 4, SPREAD = PER_PAGE * 2;
   const box = document.createElement('div');
   box.className = 'jukebox';
   box.innerHTML = `
-    <div class="jb-cabinet">
-      <span class="jb-tube l" aria-hidden="true"></span><span class="jb-tube r" aria-hidden="true"></span>
-      <div class="jb-crown" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-      <p class="jb-marquee">Silly Singles</p>
-      <div class="jb-window">
-        <div class="jb-stack left" aria-label="Earlier songs"></div>
-        <div class="jb-stage"><span class="disc on" aria-hidden="true"><span class="disc-face"><span class="disc-label"><b class="dl-title"></b><span class="dl-hole"></span><small class="dl-by"></small></span></span></span></div>
-        <div class="jb-stack right" aria-label="Next songs"></div>
+    <div class="rk">
+      <span class="rk-crown" aria-hidden="true"><i></i></span>
+      <span class="rk-pillar l" aria-hidden="true"></span><span class="rk-pillar r" aria-hidden="true"></span>
+      <div class="rk-dome">
+        <div class="rk-glass">
+          <span class="rk-curtain" aria-hidden="true"></span>
+          <div class="rk-deck"><span class="cd"><span class="cd-label"><b class="cd-title"></b><span class="cd-hub"></span><small class="cd-by"></small></span></span><span class="rk-arm" aria-hidden="true"></span></div>
+        </div>
       </div>
-      <div class="jb-strip"><div class="jb-card" aria-live="polite"><div class="jb-card-inner"></div></div></div>
-      <div class="jb-controls">
-        <button class="jb-arrow prev" aria-label="Previous song">‹</button>
-        <button class="jb-play" aria-label="Play"><span class="jb-play-icon" aria-hidden="true"></span></button>
-        <button class="jb-arrow next" aria-label="Next song">›</button>
+      <div class="rk-rack">
+        <button class="rk-turn prev" aria-label="Previous song">‹</button>
+        <div class="rk-book"><div class="rk-page left"></div><div class="rk-page right"></div></div>
+        <button class="rk-turn next" aria-label="Next song">›</button>
       </div>
+      <div class="rk-panel">
+        <div class="rk-now" aria-live="polite"></div>
+        <button class="rk-play" aria-label="Play"><span class="jb-play-icon" aria-hidden="true"></span></button>
+      </div>
+      <p class="rk-badge">MUMBO-OLA</p>
       <div class="jb-links"></div>
-      <div class="jb-grille" aria-hidden="true"></div>
+      <div class="rk-grille" aria-hidden="true"></div>
     </div>`;
   $('.board-area', scene).append(box);
 
-  const left = $('.jb-stack.left', box), right = $('.jb-stack.right', box), disc = $('.disc', box), card = $('.jb-card-inner', box), links = $('.jb-links', box), play = $('.jb-play', box);
-  let at = 0, playing = false, audio = null;
+  const book = $('.rk-book', box), pages = $$('.rk-page', box), cd = $('.cd', box), now = $('.rk-now', box), links = $('.jb-links', box), play = $('.rk-play', box);
+  let at = 0, spread = -1, playing = false, audio = null;
   const n = SINGLES.length, wrap = i => (i + n) % n;
-  const before = Math.floor((n - 1) / 2), after = n - 1 - before;
-  const spine = i => { const s = SINGLES[i]; return `<button class="spine" data-i="${i}" style="--c:${s.color}" aria-label="${esc(s.title)} by ${esc(s.artists)}"><span class="sp-ring" aria-hidden="true"></span><b>${esc(s.title)}</b><small>${esc(s.artists)}</small></button>`; };
+  const code = i => `${String.fromCharCode(65 + Math.floor(i / 2) % 26)}${i % 2 + 1}`;
+  const strip = i => { const s = SINGLES[i]; return `<button class="title-strip" data-i="${i}" style="--c:${s.color}"><span class="ts-code">${code(i)}</span><b>${esc(s.title)}</b><small>${esc(s.artists)}</small></button>`; };
 
-  function face(s) {
-    return `<p class="jb-kicker">${playing ? '▶ NOW PLAYING' : 'SELECTION ' + String(at + 1).padStart(2, '0')}</p>
-      <h3>${esc(s.title)}</h3><p class="jb-by">by ${esc(s.artists)}</p><p class="jb-date">${esc(singleDate(s))}</p>`;
+  const single = () => innerWidth <= 700;            // phones show one page at a time
+  const perSpread = () => single() ? PER_PAGE : SPREAD;
+  function fillSpread(sp, dir) {
+    const start = sp * perSpread();
+    pages.forEach((pg, k) => { pg.innerHTML = single() && k ? '' : Array.from({ length: PER_PAGE }, (_, j) => start + k * PER_PAGE + j).filter(i => i < n).map(strip).join(''); });
+    if (dir && !App.paused) { book.classList.remove('flip-l', 'flip-r'); void book.offsetWidth; book.classList.add(single() || dir < 0 ? 'flip-l' : 'flip-r'); }
+    spread = sp;
   }
   function render(dir = 0) {
-    const s = SINGLES[at];
-    // flat stacks: the nearest songs sit closest to the upright disc
-    left.innerHTML = Array.from({ length: before }, (_, k) => spine(wrap(at - before + k))).join('');
-    right.innerHTML = Array.from({ length: after }, (_, k) => spine(wrap(at + 1 + k))).join('');
-    disc.style.setProperty('--c', s.color);
-    $('.dl-title', disc).textContent = s.title;
-    $('.dl-by', disc).textContent = s.artists;
-    card.innerHTML = face(s);
-    if (dir && !App.paused) {
-      disc.classList.remove('rise-l', 'rise-r'); void disc.offsetWidth; disc.classList.add(dir > 0 ? 'rise-r' : 'rise-l');
-      card.parentElement.classList.remove('flip-up', 'flip-down'); void card.offsetWidth; card.parentElement.classList.add(dir > 0 ? 'flip-up' : 'flip-down');
-    }
+    const s = SINGLES[at], sp = Math.floor(at / perSpread());
+    if (sp !== spread) fillSpread(sp, dir);
+    $$('.title-strip', box).forEach(t => t.classList.toggle('on', +t.dataset.i === at));
+    cd.style.setProperty('--c', s.color);
+    $('.cd-title', cd).textContent = s.title;
+    $('.cd-by', cd).textContent = s.artists;
+    if (dir && !App.paused) { cd.classList.remove('drop'); void cd.offsetWidth; cd.classList.add('drop'); }
+    now.innerHTML = `<span class="rn-code">${code(at)}</span><span class="rn-text"><b>${esc(s.title)}</b><small>${esc(s.artists)} · ${esc(singleDate(s))}${playing ? ' · ▶ now playing' : ''}</small></span>`;
     links.innerHTML = `${ext(singleLink(s, 'soundcloud'), 'SoundCloud', 'btn sc')}${ext(singleLink(s, 'apple'), 'Apple Music', 'btn am')}${ext(singleLink(s, 'spotify'), 'Spotify', 'btn sp')}`;
     App.emit('inspect', { name: s.title, kind: `${s.artists} · ${singleDate(s)}` });
   }
   function stop() { playing = false; box.classList.remove('playing'); play.setAttribute('aria-label', 'Play'); audio?.pause(); }
-  function step(d) { stop(); at = wrap(at + d); render(d); }
-  $('.prev', box).addEventListener('click', () => step(-1));
-  $('.next', box).addEventListener('click', () => step(1));
-  [left, right].forEach(stack => stack.addEventListener('click', e => {
-    const sp = e.target.closest('.spine'); if (!sp) return;
-    let o = +sp.dataset.i - at; if (o > n / 2) o -= n; if (o < -n / 2) o += n;
-    stop(); at = +sp.dataset.i; render(Math.sign(o));
-  }));
+  function select(i, dir) { stop(); at = wrap(i); render(dir); }
+  $('.prev', box).addEventListener('click', () => select(at - 1, -1));
+  $('.next', box).addEventListener('click', () => select(at + 1, 1));
+  book.addEventListener('click', e => { const t = e.target.closest('.title-strip'); if (t) select(+t.dataset.i, Math.sign(+t.dataset.i - at)); });
   play.addEventListener('click', () => {
     const s = SINGLES[at];
     if (playing) { stop(); render(); return; }
     playing = true; box.classList.add('playing'); play.setAttribute('aria-label', 'Pause');
     if (s.audio) { audio ||= new Audio(); audio.src = s.audio; audio.volume = store.get('volume', 70) / 100; audio.play().catch(() => {}); }
     render();
-    if (!s.audio) card.insertAdjacentHTML('beforeend', '<p class="jb-note">Previews are coming soon. Tap a service below to listen now.</p>');
+    if (!s.audio) now.insertAdjacentHTML('beforeend', '<em class="jb-note">Previews coming soon. Tap a service to listen.</em>');
   });
   box.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); e.stopPropagation(); step(e.key === 'ArrowLeft' ? -1 : 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); e.stopPropagation(); select(at + (e.key === 'ArrowLeft' ? -1 : 1), e.key === 'ArrowLeft' ? -1 : 1); }
   });
   App.on('travel-start', stop);
+  addEventListener('resize', () => { if (box.isConnected) { spread = -1; render(); } });
   render();
 };
 
@@ -188,8 +190,6 @@ Extras.moon = (scene, board) => {
   const ui = document.createElement('div');
   ui.className = 'lock-ui'; ui.hidden = true;
   ui.innerHTML = `
-    <p class="lock-read"><span class="lr-label">DIAL</span><b class="lr-letter">·</b></p>
-    <div class="slots" aria-label="Locked-in letters">${Array.from({ length: MOON_SLOTS }, (_, i) => `<span class="slot" data-i="${i}"></span>`).join('')}</div>
     <div class="lock-btns">
       <button class="lb turn" data-turn="-1" aria-label="Turn left">⟲</button>
       <button class="lb push-btn">Push · lock in</button>
@@ -200,8 +200,14 @@ Extras.moon = (scene, board) => {
     </div>
     <p class="lock-msg" aria-live="polite">Turn the dial, push to lock in each letter.</p>`;
   scene.append(ui);
+  // locked-in letters orbit the outside of the lock, like letters round a dial
+  const orbit = document.createElement('div');
+  orbit.className = 'lock-orbit'; orbit.hidden = true;
+  orbit.setAttribute('aria-label', 'Locked-in letters');
+  orbit.innerHTML = Array.from({ length: MOON_SLOTS }, (_, i) => `<span class="slot" data-i="${i}"></span>`).join('');
+  scene.append(orbit);
 
-  const ring = $('.dial-ring', lock), hit = $('.dial-hit', lock), msg = $('.lock-msg', ui), readout = $('.lr-letter', ui);
+  const ring = $('.dial-ring', lock), hit = $('.dial-hit', lock), msg = $('.lock-msg', ui);
   let angle = 0, entered = [], zoomed = false;
   const index = () => ((Math.round(angle / STEP) % DIAL.length) + DIAL.length) % DIAL.length;
   const show = (snap = false) => {
@@ -209,13 +215,11 @@ Extras.moon = (scene, board) => {
     ring.style.transform = `rotate(${angle}deg)`;
     const l = DIAL[index()];
     $$('.letters [data-i]', lock).forEach(el => el.classList.toggle('lit', +el.dataset.i === index()));
-    readout.textContent = l === ' ' ? '·' : l;
-    readout.classList.toggle('blank', l === ' ');
     hit.setAttribute('aria-valuenow', index()); hit.setAttribute('aria-valuetext', l === ' ' ? 'blank' : l);
   };
   const turn = d => { angle = Math.round(angle / STEP) * STEP + d * STEP; show(true); click(); };   // +1 = clockwise
   const click = () => { lock.classList.remove('tick'); void lock.offsetWidth; lock.classList.add('tick'); };
-  const paint = () => $$('.slot', ui).forEach((sl, i) => {
+  const paint = () => $$('.slot', orbit).forEach((sl, i) => {
     const v = entered[i];
     sl.textContent = v && v !== ' ' ? v : '';
     sl.classList.toggle('filled', v !== undefined);
@@ -235,11 +239,11 @@ Extras.moon = (scene, board) => {
     if (word === MOON_CODE) {
       lock.classList.add('open'); msg.textContent = 'Click… it’s open!';
       moonOpen = true;
-      setTimeout(() => { exit(); setTimeout(() => { lock.remove(); ui.remove(); crackMoon(); }, App.paused ? 0 : 650); }, App.paused ? 100 : 900);
+      setTimeout(() => { exit(); setTimeout(() => { lock.remove(); ui.remove(); orbit.remove(); crackMoon(); }, App.paused ? 0 : 650); }, App.paused ? 100 : 900);
     } else {
       msg.textContent = entered.length ? 'Nope, the moon stays shut. Try again.' : 'Lock in some letters first.';
       lock.classList.remove('nope'); void lock.offsetWidth; lock.classList.add('nope');
-      if (entered.length) { ui.classList.add('wrong'); setTimeout(() => { ui.classList.remove('wrong'); entered = []; paint(); }, 700); }
+      if (entered.length) { orbit.classList.add('wrong'); setTimeout(() => { orbit.classList.remove('wrong'); entered = []; paint(); }, 700); }
     }
   }
 
@@ -252,13 +256,21 @@ Extras.moon = (scene, board) => {
     const r = board.getBoundingClientRect(), dashTop = $('#reel').getBoundingClientRect().top;
     const sr = scene.getBoundingClientRect(), uiTop = sr.top + ui.offsetTop, top = $('.hud').getBoundingClientRect().bottom + 8, bottom = Math.min(dashTop, uiTop) - 26;
     const avail = Math.max(120, bottom - top);
-    const lockW = Math.min(320, innerWidth * 0.78, avail * 0.92);
+    const lockW = Math.min(300, innerWidth * 0.56, avail * 0.66);
     const s = lockW / (CRATER.w / 100 * r.width);
     const px = CRATER.x / 100 * r.width, py = CRATER.y / 100 * r.height;
     const tx = innerWidth / 2 - r.left - px * s, ty = top + avail / 2 - r.top - py * s;
     board.style.transformOrigin = '0 0';
     board.style.transition = App.paused ? 'none' : 'transform .8s cubic-bezier(.3,.8,.3,1)';
     board.style.transform = `translate(${tx}px,${ty}px) scale(${s})`;
+    // place the letter slots on an arc around the lock, open at the bottom
+    const cx = innerWidth / 2, cy = top + avail / 2, rad = lockW / 2 + Math.max(22, lockW * 0.11);
+    $$('.slot', orbit).forEach((sl, i) => {
+      const a = (-135 + i * 270 / (MOON_SLOTS - 1)) * Math.PI / 180;
+      sl.style.left = `${cx + Math.sin(a) * rad}px`; sl.style.top = `${cy - Math.cos(a) * rad}px`;
+      sl.style.setProperty('--d', `${i * 30}ms`);
+    });
+    orbit.hidden = false;
     paint(); show();
     setTimeout(() => hit.focus({ preventScroll: true }), 50);
   }
@@ -266,7 +278,7 @@ Extras.moon = (scene, board) => {
     if (!zoomed) return;
     zoomed = false;
     document.body.classList.remove('lock-mode');
-    ui.hidden = true;
+    ui.hidden = true; orbit.hidden = true;
     board.style.transform = '';
     setTimeout(() => { if (!zoomed) { board.style.transition = ''; board.style.transformOrigin = ''; } }, 850);
   }
