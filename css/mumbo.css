@@ -518,7 +518,7 @@ body.traveling .city-heading, body.traveling #edgeArrows, body.traveling .world-
 .rk-pillar::after { content: ''; position: absolute; left: 22%; right: 22%; top: 18%; bottom: 18%; border-radius: 999px; background: linear-gradient(#ffd27a, #ff8a3d 50%, #ff4f6d); box-shadow: 0 0 14px #ff8a3d; animation: tube 3s ease-in-out infinite; }
 .rk-pillar.l { left: 1%; } .rk-pillar.r { right: 1%; }
 /* the arched glass dome, glowing amber, with the record deck inside */
-.rk-dome { position: relative; width: 100%; flex: 0 0 37cqh; border-radius: 50% 50% 8px 8px / 62% 62% 8px 8px; padding: 1.4cqh; background: linear-gradient(#b38a52, #6e4a22); box-shadow: inset 0 2px 0 #ffe2a8, 0 3px 0 #4a3010; }
+.rk-dome { position: relative; width: 100%; flex: 0 0 29cqh; border-radius: 50% 50% 8px 8px / 62% 62% 8px 8px; padding: 1.4cqh; background: linear-gradient(#b38a52, #6e4a22); box-shadow: inset 0 2px 0 #ffe2a8, 0 3px 0 #4a3010; }
 .rk-glass { position: relative; height: 100%; overflow: hidden; border-radius: inherit; background: radial-gradient(ellipse at 50% 80%, #ffe2a0, #ffaa4a 35%, #c2521a 65%, #4a1806 92%); box-shadow: inset 0 0 26px #2a0c02, inset 0 0 0 2px #ffe0a855; }
 .rk-curtain { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #00000028 0 3px, transparent 3px 14px), radial-gradient(ellipse at 50% 120%, transparent 40%, #3a1205aa 80%); }
 .rk-deck { position: absolute; left: 50%; bottom: 6%; translate: -50% 0; height: 86%; aspect-ratio: 1.15; display: grid; place-items: center; container-type: size; }
@@ -542,16 +542,30 @@ body.traveling .city-heading, body.traveling #edgeArrows, body.traveling .world-
 .rk-turn { flex: none; width: 7%; min-width: 32px; border-radius: 10px; font: 900 clamp(24px, 6cqh, 40px)/1 Arial, sans-serif; color: #fff; background: linear-gradient(90deg, #4a4f5c, #e8ebf2 45%, #8e939e); border: 2px solid #2a2d36; box-shadow: 0 3px 0 #1a1c22; text-shadow: 0 1px 2px #000; transition: filter .15s, transform .1s; }
 .rk-turn:hover { filter: brightness(1.15); }
 .rk-turn:active { transform: translateY(2px); }
-.rk-book { flex: 1; min-width: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 3%; padding: 1.4cqh 2.5%; border-radius: 10px; perspective: 900px;
+.rk-book { position: relative; flex: 1; min-width: 0; border-radius: 10px; perspective: 1100px; transform-style: preserve-3d;
   background: radial-gradient(ellipse at 50% 50%, #9dffb0, #3ccf6a 55%, #136a33); border: 4px solid #2a2d36; box-shadow: inset 0 0 0 3px #c9ced8, inset 0 0 22px #0b3a1c, 0 0 22px #57e88a66; }
-.rk-page { display: flex; flex-direction: column; gap: 1cqh; padding: 1cqh; border-radius: 4px; background: #f6f1df; box-shadow: 0 2px 6px #0006, inset 0 0 0 1px #c8bd9e; transform-origin: center; }
-.rk-book.flip-r .rk-page.right, .rk-book.flip-l .rk-page.left { animation: page-flip .45s ease-in-out; }
-.title-strip { position: relative; flex: 1; min-height: 0; display: grid; grid-template-columns: auto 1fr; grid-template-rows: 1fr 1fr; column-gap: 6px; align-items: center; padding: 0 6px 0 4px; text-align: left; overflow: hidden;
+/* pages and leaves share one geometry: half the book each side of the spine */
+.rk-page, .leaf { position: absolute; top: 7%; bottom: 7%; width: 44%; }
+.rk-page.left, .leaf.back { left: 5%; } .rk-page.right, .leaf.fwd { left: 51%; }
+.rk-page, .face { display: flex; flex-direction: column; gap: 6%; padding: 4% 4%; border-radius: 3px; background: #f6f1df; box-shadow: 0 2px 6px #0006, inset 0 0 0 1px #c8bd9e; }
+.rk-spine { position: absolute; left: 49.4%; top: 6%; bottom: 6%; width: 1.2%; border-radius: 3px; background: linear-gradient(90deg, #6e737e, #f0f2f6, #6e737e); box-shadow: 0 0 4px #000a; z-index: 3; }
+.leaf { z-index: 4; transform-style: preserve-3d; transition: transform var(--dur) cubic-bezier(.45, .05, .35, 1); }
+.leaf.fwd { transform-origin: -2.7% 50%; }
+.leaf.back { transform-origin: 102.7% 50%; transform: rotateY(180deg); }
+.leaf.fwd.go { transform: rotateY(-180deg); }
+.leaf.back.go { transform: rotateY(0deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.face.rear { transform: rotateY(180deg); }
+.leaf.fwd .face.rear, .leaf.back .face.front { pointer-events: none; }
+/* a moving shadow sells the page turn */
+.face::after { content: ''; position: absolute; inset: 0; border-radius: 3px; pointer-events: none; background: linear-gradient(90deg, #0000, #0003); }
+.leaf .title-strip { pointer-events: none; }
+.title-strip { position: relative; flex: 1; min-height: 0; border-radius: 2px; display: grid; grid-template-columns: auto 1fr; grid-template-rows: 1fr 1fr; column-gap: 6px; align-items: center; padding: 0 6px 0 4px; text-align: left; overflow: hidden;
   background: #fffdf5; border-top: 2px solid var(--c); border-bottom: 2px solid var(--c); color: #2a1a40; transition: background .15s, box-shadow .15s; }
 .title-strip:hover { background: #fff3c4; }
 .title-strip.on { background: #ffe88a; box-shadow: 0 0 0 2px #e01f2f, 0 0 12px #ffd345; }
-.ts-code { grid-row: 1 / 3; font: 900 clamp(10px, 2.3cqh, 14px)/1 var(--display); color: #e01f2f; }
-.title-strip b { font: 900 clamp(10px, 2.4cqh, 15px)/1 var(--display); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: end; }
+.ts-code { grid-row: 1 / 3; font: 900 clamp(11px, 2.6cqh, 16px)/1 var(--display); color: #e01f2f; }
+.title-strip b { font: 900 clamp(11px, 2.6cqh, 16px)/1.02 var(--display); text-transform: uppercase; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; align-self: end; }
 .title-strip small { font: 700 clamp(8px, 1.7cqh, 11px)/1 var(--font); color: #6a5a80; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: start; padding-top: 2px; }
 /* selector panel */
 .rk-panel { z-index: 1; width: 88%; display: flex; align-items: center; gap: 12px; padding: .8cqh 12px; border-radius: 10px; background: linear-gradient(#2a2d36, #121318); border: 2px solid #c9ced8; box-shadow: inset 0 0 12px #000; }
@@ -694,11 +708,13 @@ body.lock-mode .moon-panel, body.lock-mode .city-heading, body.lock-mode #edgeAr
   .reasons, .contact .row { grid-template-columns: 1fr; }
   .jukebox { place-items: start center; overflow-y: auto; scrollbar-width: none; }
   .rk { --w: 100%; height: auto; min-height: 100cqh; padding: 16px 9% 10px; gap: 8px; }
-  .rk-dome { flex: none; height: 150px; }
-  .rk-rack { flex: none; height: 168px; }
+  .rk-dome { flex: none; height: 118px; }
+  .rk-rack { flex: none; height: 150px; }
+  .jukebox { inset: 8px 0 0; }
   .rk-turn { min-width: 26px; font-size: 24px; }
-  .rk-book { grid-template-columns: 1fr; gap: 6px; padding: 6px; }
-  .rk-page.right { display: none; }
+  .title-strip small { display: none; }
+  .title-strip { grid-template-rows: 1fr; }
+  .title-strip b { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 11px; align-self: center; }
   .rk-panel { width: 100%; }
   .rn-text b { font-size: 16px; }
   .jb-links .btn { padding: 6px 10px; font-size: 12px; }

@@ -92,6 +92,10 @@ The structure follows your brief: bucket-hat galaxy → wormhole → universe ma
   - Below that is the green-lit title-strip book. Each song has a strip with its code (A1, A2, B1…), title and artist. Click a strip to pick it, or use the chrome ‹ › to step through, and the page flips when you move to a new page. Phones show one page at a time.
   - A selector panel shows the current pick and its release date, with the red play button and the SoundCloud, Apple Music and Spotify buttons.
 
+## Round 7 changes
+- **Silly Singles page flipping:** the title pages now work like a real wall-box selector. Double-sided pages are hinged on a chrome spine in the middle of the green-lit window. ‹ › turns one page with a 3D flip, and holding an arrow flicks through the pages continuously, like in the jukebox reference video. When you arrive, the pages flick through once. Each page holds two title strips; click a strip to pick that song.
+- **Moon lock:** a wrong code no longer clears your letters. It says "Incorrect", flashes the tiles red, and keeps them so you can fix them.
+
 ## Behaviour I changed (round 1) (please check)
 
 1. **Blimp message.** The 10/2 Hurtbox show has passed, so the blimp now reads "New shows landing soon ★ Bookings: mumbobeatz@gmail.com" with a "NEW SHOWS SOON" flyer. Shows now live in one list in `js/data.js` with real dates. Add a show there and it appears on the blimp, in Event Central and in INFO, then moves to the archive by itself after the date.

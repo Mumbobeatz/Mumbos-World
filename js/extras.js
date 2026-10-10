@@ -13,7 +13,7 @@ const singleDate = s => s.date ? new Date(s.date + 'T12:00:00').toLocaleDateStri
    ========================================================================== */
 Extras.jukebox = scene => {
   scene.classList.add('is-jukebox');
-  const PER_PAGE = 4, SPREAD = PER_PAGE * 2;
+  const PER_PAGE = 2;   // title strips per page; pages flip like a real wall-box
   const box = document.createElement('div');
   box.className = 'jukebox';
   box.innerHTML = `
@@ -27,9 +27,9 @@ Extras.jukebox = scene => {
         </div>
       </div>
       <div class="rk-rack">
-        <button class="rk-turn prev" aria-label="Previous song">‹</button>
-        <div class="rk-book"><div class="rk-page left"></div><div class="rk-page right"></div></div>
-        <button class="rk-turn next" aria-label="Next song">›</button>
+        <button class="rk-turn prev" aria-label="Flip back">‹</button>
+        <div class="rk-book"><div class="rk-page left"></div><div class="rk-page right"></div><span class="rk-spine" aria-hidden="true"></span></div>
+        <button class="rk-turn next" aria-label="Flip forward">›</button>
       </div>
       <div class="rk-panel">
         <div class="rk-now" aria-live="polite"></div>
@@ -47,18 +47,44 @@ Extras.jukebox = scene => {
   const code = i => `${String.fromCharCode(65 + Math.floor(i / 2) % 26)}${i % 2 + 1}`;
   const strip = i => { const s = SINGLES[i]; return `<button class="title-strip" data-i="${i}" style="--c:${s.color}"><span class="ts-code">${code(i)}</span><b>${esc(s.title)}</b><small>${esc(s.artists)}</small></button>`; };
 
-  const single = () => innerWidth <= 700;            // phones show one page at a time
-  const perSpread = () => single() ? PER_PAGE : SPREAD;
-  function fillSpread(sp, dir) {
-    const start = sp * perSpread();
-    pages.forEach((pg, k) => { pg.innerHTML = single() && k ? '' : Array.from({ length: PER_PAGE }, (_, j) => start + k * PER_PAGE + j).filter(i => i < n).map(strip).join(''); });
-    if (dir && !App.paused) { book.classList.remove('flip-l', 'flip-r'); void book.offsetWidth; book.classList.add(single() || dir < 0 ? 'flip-l' : 'flip-r'); }
-    spread = sp;
+  /* ---- the title-page book: double-sided leaves hinged on a centre spine ---- */
+  const nPages = Math.ceil(n / PER_PAGE), nSpreads = Math.ceil(nPages / 2);
+  const pageHTML = pg => Array.from({ length: PER_PAGE }, (_, j) => pg * PER_PAGE + j).filter(i => i < n).map(strip).join('');
+  const sideOf = (sp, right) => pageHTML(((sp % nSpreads + nSpreads) % nSpreads) * 2 + (right ? 1 : 0));
+  let flipping = false, queue = 0, hold = null;
+  function showSpread(sp) {
+    spread = (sp % nSpreads + nSpreads) % nSpreads;
+    pages[0].innerHTML = sideOf(spread, false); pages[1].innerHTML = sideOf(spread, true);
+    mark();
   }
+  const mark = () => $$('.title-strip', box).forEach(t => t.classList.toggle('on', +t.dataset.i === at));
+  function flip(dir, fast = false) {
+    if (flipping) { queue = Math.max(-6, Math.min(6, queue + dir)); return; }
+    if (App.paused) { showSpread(spread + dir); return; }
+    flipping = true;
+    const from = spread, to = spread + dir, dur = fast ? 190 : 430;
+    // underneath: the page that stays put, and the page about to be revealed
+    pages[0].innerHTML = sideOf(dir > 0 ? from : to, false);
+    pages[1].innerHTML = sideOf(dir > 0 ? to : from, true);
+    const leaf = document.createElement('div');
+    leaf.className = 'leaf ' + (dir > 0 ? 'fwd' : 'back');
+    leaf.innerHTML = `<div class="face front">${sideOf(dir > 0 ? from : to, true)}</div><div class="face rear">${sideOf(dir > 0 ? to : from, false)}</div>`;
+    leaf.style.setProperty('--dur', dur + 'ms');
+    book.append(leaf);
+    mark();
+    requestAnimationFrame(() => leaf.classList.add('go'));
+    setTimeout(() => {
+      leaf.remove(); flipping = false; showSpread(to);
+      if (queue) { const d = Math.sign(queue); queue -= d; flip(d, true); }
+    }, dur + 20);
+  }
+  // hold an arrow to flick through, like thumbing the wall-box pages
+  const startHold = d => { stopHold(); flip(d); hold = setInterval(() => flip(d, true), 260); };
+  const stopHold = () => { clearInterval(hold); hold = null; };
   function render(dir = 0) {
-    const s = SINGLES[at], sp = Math.floor(at / perSpread());
-    if (sp !== spread) fillSpread(sp, dir);
-    $$('.title-strip', box).forEach(t => t.classList.toggle('on', +t.dataset.i === at));
+    const s = SINGLES[at];
+    if (spread < 0) showSpread(Math.floor(at / (PER_PAGE * 2)));
+    mark();
     cd.style.setProperty('--c', s.color);
     $('.cd-title', cd).textContent = s.title;
     $('.cd-by', cd).textContent = s.artists;
@@ -69,9 +95,13 @@ Extras.jukebox = scene => {
   }
   function stop() { playing = false; box.classList.remove('playing'); play.setAttribute('aria-label', 'Play'); audio?.pause(); }
   function select(i, dir) { stop(); at = wrap(i); render(dir); }
-  $('.prev', box).addEventListener('click', () => select(at - 1, -1));
-  $('.next', box).addEventListener('click', () => select(at + 1, 1));
-  book.addEventListener('click', e => { const t = e.target.closest('.title-strip'); if (t) select(+t.dataset.i, Math.sign(+t.dataset.i - at)); });
+  [['.prev', -1], ['.next', 1]].forEach(([q, d]) => {
+    const b = $(q, box);
+    b.addEventListener('pointerdown', e => { e.preventDefault(); startHold(d); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, stopHold));
+    b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(d); } });
+  });
+  book.addEventListener('click', e => { const t = e.target.closest('.pages-live .title-strip, .rk-page .title-strip'); if (t) select(+t.dataset.i, 1); });
   play.addEventListener('click', () => {
     const s = SINGLES[at];
     if (playing) { stop(); render(); return; }
@@ -81,11 +111,12 @@ Extras.jukebox = scene => {
     if (!s.audio) now.insertAdjacentHTML('beforeend', '<em class="jb-note">Previews coming soon. Tap a service to listen.</em>');
   });
   box.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); e.stopPropagation(); select(at + (e.key === 'ArrowLeft' ? -1 : 1), e.key === 'ArrowLeft' ? -1 : 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); e.stopPropagation(); flip(e.key === 'ArrowLeft' ? -1 : 1); }
   });
-  App.on('travel-start', stop);
-  addEventListener('resize', () => { if (box.isConnected) { spread = -1; render(); } });
+  App.on('travel-start', () => { stop(); stopHold(); });
   render();
+  // on arrival the pages flick through once, like the wall-box warming up
+  if (!App.paused) setTimeout(() => { if (box.isConnected) { queue = nSpreads - 1; flip(1, true); } }, 700);
 };
 
 /* ==========================================================================
@@ -241,9 +272,9 @@ Extras.moon = (scene, board) => {
       moonOpen = true;
       setTimeout(() => { exit(); setTimeout(() => { lock.remove(); ui.remove(); orbit.remove(); crackMoon(); }, App.paused ? 0 : 650); }, App.paused ? 100 : 900);
     } else {
-      msg.textContent = entered.length ? 'Nope, the moon stays shut. Try again.' : 'Lock in some letters first.';
+      msg.textContent = entered.length ? 'Incorrect. Fix the letters and try again.' : 'Lock in some letters first.';
       lock.classList.remove('nope'); void lock.offsetWidth; lock.classList.add('nope');
-      if (entered.length) { orbit.classList.add('wrong'); setTimeout(() => { orbit.classList.remove('wrong'); entered = []; paint(); }, 700); }
+      if (entered.length) { orbit.classList.add('wrong'); setTimeout(() => orbit.classList.remove('wrong'), 700); }
     }
   }
 
