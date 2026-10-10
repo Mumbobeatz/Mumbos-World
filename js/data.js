@@ -59,8 +59,8 @@ const CONTACT_REASONS = [
 /* ---------- Mumbo's Moon secret lock ----------
    The answer and the folder link are visible to anyone who reads the page
    code, so keep this playful — nothing private belongs behind it. */
-const MOON_CODE = 'MUMBO JUMBO';
-const MOON_SLOTS = 13;
+const MOON_CODE = 'MUMBOJUMBO';
+const MOON_SLOTS = MOON_CODE.length;   // one tile per letter; the last one auto-submits
 const SECRET_FOLDER_URL = '';   // paste the Dropbox link here when it's ready
 
 /* ---------- Silly Singles jukebox ----------

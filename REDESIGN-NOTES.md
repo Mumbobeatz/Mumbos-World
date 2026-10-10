@@ -96,6 +96,13 @@ The structure follows your brief: bucket-hat galaxy → wormhole → universe ma
 - **Silly Singles page flipping:** the title pages now work like a real wall-box selector. Double-sided pages are hinged on a chrome spine in the middle of the green-lit window. ‹ › turns one page with a 3D flip, and holding an arrow flicks through the pages continuously, like in the jukebox reference video. When you arrive, the pages flick through once. Each page holds two title strips; click a strip to pick that song.
 - **Moon lock:** a wrong code no longer clears your letters. It says "Incorrect", flashes the tiles red, and keeps them so you can fix them.
 
+## Round 8 changes
+- **Moon lock:** the code is now **MUMBOJUMBO**, ten tiles with no blank spaces, and the blank is gone from the dial.
+  - Tap a letter on the ring to swing the pointer to it, or drag, scroll or use the arrow keys. Press the centre knob to lock it in.
+  - The 10th letter submits automatically. A wrong code turns the tiles red, shakes, then clears so you can try again.
+  - Tap a tile to take back that letter and everything after it.
+  - The bottom button panel is gone. A small "← Back" pill (or Esc) closes the lock.
+
 ## Behaviour I changed (round 1) (please check)
 
 1. **Blimp message.** The 10/2 Hurtbox show has passed, so the blimp now reads "New shows landing soon ★ Bookings: mumbobeatz@gmail.com" with a "NEW SHOWS SOON" flyer. Shows now live in one list in `js/data.js` with real dates. Add a show there and it appears on the blimp, in Event Central and in INFO, then moves to the archive by itself after the date.

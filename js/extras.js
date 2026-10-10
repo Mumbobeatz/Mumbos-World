@@ -146,7 +146,7 @@ Extras.billboard = board => {
    Turn the dial to a letter, push it in to lock that letter into the next
    slot, then open the moon. MUMBO JUMBO (rest blank) cracks the moon open.
    ========================================================================== */
-const DIAL = [' ', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];   // position 0 is the blank
+const DIAL = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
 const STEP = 360 / DIAL.length;
 let moonOpen = false;   // re-locks on every visit
 const CRATER = { x: 70.3, y: 54.9, w: 15.2 };   // the big right-hand crater, % of the moon art
@@ -158,9 +158,7 @@ function lockSVG() {
   // fixed letter ring on the bezel; letters stay upright so every one is readable
   const letters = DIAL.map((l, i) => {
     const a = (i * STEP - 90) * Math.PI / 180, x = 100 + Math.cos(a) * 84, y = 100 + Math.sin(a) * 84;
-    return l === ' '
-      ? `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="3.4" class="dot" data-i="${i}"/>`
-      : `<text x="${x.toFixed(2)}" y="${(y + 4.4).toFixed(2)}" class="ltr" data-i="${i}">${l}</text>`;
+    return `<g class="lt" data-i="${i}"><circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="10" class="lt-hit"/><text x="${x.toFixed(2)}" y="${(y + 4.4).toFixed(2)}" class="ltr">${l}</text></g>`;
   }).join('');
   const grips = Array.from({ length: 36 }, (_, i) => `<line x1="100" y1="31" x2="100" y2="36" transform="rotate(${i * 10} 100 100)" class="grip"/>`).join('');
   return `<svg viewBox="0 0 200 200" class="lock-svg" aria-hidden="true">
@@ -218,18 +216,9 @@ Extras.moon = (scene, board) => {
     <button class="push-hit" tabindex="-1" aria-label="Push to lock in the letter"></button>
     <span class="crater-tip">Locked…</span>`;
   board.append(lock);
-  const ui = document.createElement('div');
-  ui.className = 'lock-ui'; ui.hidden = true;
-  ui.innerHTML = `
-    <div class="lock-btns">
-      <button class="lb turn" data-turn="-1" aria-label="Turn left">⟲</button>
-      <button class="lb push-btn">Push · lock in</button>
-      <button class="lb turn" data-turn="1" aria-label="Turn right">⟳</button>
-    </div>
-    <div class="lock-btns small">
-      <button class="lb undo">Undo</button><button class="lb clear">Clear</button><button class="lb pull">Open the moon</button><button class="lb exit">Back</button>
-    </div>
-    <p class="lock-msg" aria-live="polite">Turn the dial, push to lock in each letter.</p>`;
+  const ui = document.createElement('button');
+  ui.className = 'lock-back'; ui.hidden = true; ui.textContent = '← Back';
+  ui.setAttribute('aria-label', 'Close the lock');
   scene.append(ui);
   // locked-in letters orbit the outside of the lock, like letters round a dial
   const orbit = document.createElement('div');
@@ -238,7 +227,7 @@ Extras.moon = (scene, board) => {
   orbit.innerHTML = Array.from({ length: MOON_SLOTS }, (_, i) => `<span class="slot" data-i="${i}"></span>`).join('');
   scene.append(orbit);
 
-  const ring = $('.dial-ring', lock), hit = $('.dial-hit', lock), msg = $('.lock-msg', ui);
+  const ring = $('.dial-ring', lock), hit = $('.dial-hit', lock), say = t => App.emit('inspect', { name: 'Moon lock', kind: t });
   let angle = 0, entered = [], zoomed = false;
   const index = () => ((Math.round(angle / STEP) % DIAL.length) + DIAL.length) % DIAL.length;
   const show = (snap = false) => {
@@ -257,24 +246,25 @@ Extras.moon = (scene, board) => {
     sl.classList.toggle('space', v === ' ');
     sl.classList.toggle('next', i === entered.length);
   });
+  let checking = false;
   function push() {
-    if (entered.length >= MOON_SLOTS) { msg.textContent = 'All slots are full. Open the moon, or undo.'; return; }
+    if (checking || entered.length >= MOON_SLOTS) return;
     entered.push(DIAL[index()]);
     lock.classList.remove('pushed'); void lock.offsetWidth; lock.classList.add('pushed');
     paint();
-    const l = DIAL[index()];
-    msg.textContent = l === ' ' ? 'Blank locked in.' : `${l} locked in.`;
+    say(`${DIAL[index()]} locked in · ${MOON_SLOTS - entered.length} to go`);
+    if (entered.length === MOON_SLOTS) { checking = true; setTimeout(pull, 350); }   // last letter submits
   }
   function pull() {
-    const word = entered.join('').trim().replace(/\s+/g, ' ');
-    if (word === MOON_CODE) {
-      lock.classList.add('open'); msg.textContent = 'Click… it’s open!';
+    if (entered.join('') === MOON_CODE) {
+      lock.classList.add('open'); say('Click… it’s open!');
       moonOpen = true;
       setTimeout(() => { exit(); setTimeout(() => { lock.remove(); ui.remove(); orbit.remove(); crackMoon(); }, App.paused ? 0 : 650); }, App.paused ? 100 : 900);
     } else {
-      msg.textContent = entered.length ? 'Incorrect. Fix the letters and try again.' : 'Lock in some letters first.';
+      say('Incorrect, try again');
       lock.classList.remove('nope'); void lock.offsetWidth; lock.classList.add('nope');
-      if (entered.length) { orbit.classList.add('wrong'); setTimeout(() => orbit.classList.remove('wrong'), 700); }
+      orbit.classList.remove('wrong'); void orbit.offsetWidth; orbit.classList.add('wrong');
+      setTimeout(() => { orbit.classList.remove('wrong'); entered = []; checking = false; paint(); }, 1100);
     }
   }
 
@@ -285,9 +275,9 @@ Extras.moon = (scene, board) => {
     document.body.classList.add('lock-mode');
     ui.hidden = false;
     const r = board.getBoundingClientRect(), dashTop = $('#reel').getBoundingClientRect().top;
-    const sr = scene.getBoundingClientRect(), uiTop = sr.top + ui.offsetTop, top = $('.hud').getBoundingClientRect().bottom + 8, bottom = Math.min(dashTop, uiTop) - 26;
+    const top = $('.hud').getBoundingClientRect().bottom + 8, bottom = dashTop - 20;
     const avail = Math.max(120, bottom - top);
-    const lockW = Math.min(300, innerWidth * 0.56, avail * 0.66);
+    const lockW = Math.min(340, innerWidth * 0.58, avail * 0.7);
     const s = lockW / (CRATER.w / 100 * r.width);
     const px = CRATER.x / 100 * r.width, py = CRATER.y / 100 * r.height;
     const tx = innerWidth / 2 - r.left - px * s, ty = top + avail / 2 - r.top - py * s;
@@ -297,7 +287,7 @@ Extras.moon = (scene, board) => {
     // place the letter slots on an arc around the lock, open at the bottom
     const cx = innerWidth / 2, cy = top + avail / 2, rad = lockW / 2 + Math.max(22, lockW * 0.11);
     $$('.slot', orbit).forEach((sl, i) => {
-      const a = (-135 + i * 270 / (MOON_SLOTS - 1)) * Math.PI / 180;
+      const a = (-120 + i * 240 / (MOON_SLOTS - 1)) * Math.PI / 180;
       sl.style.left = `${cx + Math.sin(a) * rad}px`; sl.style.top = `${cy - Math.cos(a) * rad}px`;
       sl.style.setProperty('--d', `${i * 30}ms`);
     });
@@ -319,12 +309,15 @@ Extras.moon = (scene, board) => {
   lock.addEventListener('pointerenter', () => { if (!zoomed) App.emit('inspect', { name: 'Locked crater', kind: 'Something is hidden in the moon…' }); });
   lock.addEventListener('pointerleave', () => { if (!zoomed) App.emit('inspect', null); });
   $('.push-hit', lock).addEventListener('click', push);
-  $('.push-btn', ui).addEventListener('click', push);
-  $('.pull', ui).addEventListener('click', pull);
-  $('.undo', ui).addEventListener('click', () => { entered.pop(); paint(); msg.textContent = 'Undone.'; });
-  $('.clear', ui).addEventListener('click', () => { entered = []; paint(); msg.textContent = 'Cleared.'; });
-  $('.exit', ui).addEventListener('click', exit);
-  $$('[data-turn]', ui).forEach(b => b.addEventListener('click', () => turn(+b.dataset.turn)));
+  ui.addEventListener('click', exit);
+  // tap a letter on the ring to swing the pointer straight to it
+  $$('.letters [data-i]', lock).forEach(el => el.addEventListener('click', () => {
+    if (!zoomed) return;
+    let d = +el.dataset.i - index(); if (d > 13) d -= 26; if (d < -13) d += 26;
+    angle = Math.round(angle / STEP) * STEP + d * STEP; show(true); click();
+  }));
+  // tap a locked-in tile to take back that letter and everything after it
+  orbit.addEventListener('click', e => { const t = e.target.closest('.slot.filled'); if (!t || checking) return; entered = entered.slice(0, +t.dataset.i); paint(); });
 
   // drag the dial round like a real locker lock
   let drag = null;
@@ -344,7 +337,7 @@ Extras.moon = (scene, board) => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); turn(-1); }
     else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); turn(1); }
     else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); push(); }
-    else if (e.key === 'Backspace') { e.preventDefault(); entered.pop(); paint(); }
+    else if (e.key === 'Backspace') { e.preventDefault(); if (!checking) { entered.pop(); paint(); } }
   });
   hit.tabIndex = 0;
   App.on('travel-start', exit);
